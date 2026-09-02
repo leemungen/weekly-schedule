@@ -359,7 +359,7 @@
         const todayReal = new Date();
         const todayStr = getFormattedDate(todayReal);
 
-        let currentDate = new Date(todayReal.getFullYear(), todayReal.getMonth(), todayReal.getDate());
+        let currentDate = new Date(todayReal);
         let sortedDates = [];
 
         // 🔥 슬래시(/)를 제한 문자로 간주하므로 키 명칭 수정 완료
