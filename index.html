@@ -41,7 +41,6 @@
         .title-area h1 { font-size: 23px; font-weight: 700; color: #1e293b; }
         .week-navigator { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         
-        /* 1. 검색창 스타일 */
         .search-input {
             padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
             font-size: 13px; outline: none; width: 180px; transition: border-color 0.2s;
@@ -94,7 +93,6 @@
         .date-header { font-size: 14px; font-weight: 700; }
         .day-sub { font-size: 12px; color: var(--text-muted); font-weight: 400; }
 
-        /* 2. 카드 & 드래그앤드롭 스타일 */
         .item-card { 
             background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; 
             padding: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); font-size: 13px; position: relative; 
@@ -105,7 +103,6 @@
         .item-card.highlight { border-color: #f59e0b; background-color: #fef3c7; }
         .item-card.hidden { display: none !important; }
 
-        /* 3. 자동 높이 조절 Textarea */
         .editable-textarea { 
             width: 100%; min-height: 52px; border: 1px solid #cbd5e1; border-radius: 4px; 
             padding: 4px 6px; font-size: 12px; line-height: 1.3; margin-bottom: 4px; outline: none; 
@@ -136,7 +133,6 @@
             <h1>📋 품질팀 주간 스케줄 관리<span id="ocrStatus"></span></h1>
         </div>
         <div class="week-navigator">
-            <!-- 1. 검색 및 필터 입력 영역 -->
             <input type="text" id="searchInput" class="search-input" oninput="filterTasks()" placeholder="🔍 담당자/내용 검색...">
             
             <div class="today-badge" id="todayDisplay">오늘: YYYY-MM-DD</div>
@@ -191,7 +187,13 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const scheduleRef = database.ref("weekly_schedule");
-        const teamMembers = ["이문근P", "양승현P", "권대협P", "김민수P", "박준형P", "품질팀 전체", "미배정"];
+
+        // 팀원 목록 업데이트 ('P' 제거)
+        const teamMembers = [
+            "신형근", "이문근", "권대협", "양승현", 
+            "곽승범", "김수원", "김나현", "이우진", 
+            "윤대석", "이현지", "임창섭", "품질팀 전체", "미배정"
+        ];
 
         function getFormattedDate(dateObj) {
             const yyyy = dateObj.getFullYear();
@@ -292,7 +294,7 @@
                 else if (/dr|미팅|회의/i.test(trimmed)) targetProc = "DR 및 미팅";
 
                 if (!boardData[targetProc][targetDate]) boardData[targetProc][targetDate] = [];
-                boardData[targetProc][targetDate].push({ content: trimmed, name: "이문근P", isOcr: true });
+                boardData[targetProc][targetDate].push({ content: trimmed, name: "", isOcr: true });
             });
             autoSave();
         }
@@ -346,7 +348,6 @@
                     cellContainer.setAttribute("data-proc", p.key);
                     cellContainer.setAttribute("data-date", dateStr);
                     
-                    // 2. 드래그 앤 드롭 이벤트 타겟 설정
                     cellContainer.ondragover = handleDragOver;
                     cellContainer.ondragleave = handleDragLeave;
                     cellContainer.ondrop = handleDrop;
@@ -367,14 +368,17 @@
 
                         let tagHtml = item.isOcr ? `<span class="ocr-tag">📷 캡처</span>` : '';
                         let contentVal = item.content !== undefined ? item.content : ((item.title || '') + (item.note ? '\n' + item.note : ''));
+                        
+                        // 기존 데이터에 혹시 남아있을 수 있는 'P' 자동 제거 정제
+                        let cleanedName = (item.name || '').replace(/P$/, '');
 
                         card.innerHTML = `
                             <button class="delete-btn" onclick="removeTask('${p.key}', '${dateStr}', ${idx})">×</button>
                             ${tagHtml}
                             <textarea class="editable-textarea" placeholder="내용 작성..." oninput="autoResizeTextarea(this)" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
                             <div class="assignee-input-group">
-                                <span class="assignee-label">담당 :</span>
-                                <input type="text" class="assignee-input" list="team-list-${p.key}-${dateStr}-${idx}" value="${item.name || ''}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
+                                <span class="assignee-label">담당자 :</span>
+                                <input type="text" class="assignee-input" list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
                                 <datalist id="team-list-${p.key}-${dateStr}-${idx}">
                                     ${teamMembers.map(m => `<option value="${m}">`).join('')}
                                 </datalist>
@@ -382,7 +386,6 @@
                         `;
                         cellContainer.appendChild(card);
                         
-                        // 렌더링 후 초기 높이 조절 실행
                         setTimeout(() => {
                             const ta = card.querySelector('textarea');
                             if(ta) autoResizeTextarea(ta);
@@ -406,16 +409,14 @@
                 document.getElementById(`${p.idPrefix}-daily`).innerText = `오늘 ${dailyCounts[p.key]}건`;
             });
 
-            filterTasks(); // 렌더링 후 검색 필터 재적용
+            filterTasks();
         }
 
-        // 3. Textarea 높이 자동 조절 기능
         function autoResizeTextarea(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
         }
 
-        // 1. 검색 및 필터링 기능 implementation
         function filterTasks() {
             const query = document.getElementById("searchInput").value.toLowerCase().trim();
             const cards = document.querySelectorAll(".item-card");
@@ -436,7 +437,6 @@
             });
         }
 
-        // 2. 드래그 앤 드롭 (Drag and Drop) 로직
         let draggedItemInfo = null;
 
         function handleDragStart(e, procKey, dateStr, idx) {
@@ -473,25 +473,22 @@
 
             const { procKey, dateStr, idx } = draggedItemInfo;
 
-            // 동일 위치 드롭 시 무시
             if (procKey === targetProc && dateStr === targetDate) return;
 
-            // 이전 위치 데이터 추출 및 제거
             const movedItem = boardData[procKey][dateStr].splice(idx, 1)[0];
 
-            // 새로운 위치 데이터 삽입
             if (!boardData[targetProc]) boardData[targetProc] = {};
             if (!boardData[targetProc][targetDate]) boardData[targetProc][targetDate] = [];
             boardData[targetProc][targetDate].push(movedItem);
 
             draggedItemInfo = null;
-            autoSave(); // 변경 데이터 저장 및 자동 렌더링
+            autoSave();
         }
 
         function addTask(procKey, dateStr) {
             if (!boardData[procKey]) boardData[procKey] = {};
             if (!boardData[procKey][dateStr]) boardData[procKey][dateStr] = [];
-            boardData[procKey][dateStr].push({ content: "", name: "이문근P", isOcr: false });
+            boardData[procKey][dateStr].push({ content: "", name: "", isOcr: false });
             autoSave();
         }
 
