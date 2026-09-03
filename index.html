@@ -56,7 +56,6 @@
         }
 
         .title-area h1 { font-size: 22px; font-weight: 700; color: #1e293b; }
-        .title-area p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
         .week-navigator {
             display: flex;
@@ -242,8 +241,7 @@
 
     <div class="header-container">
         <div class="title-area">
-            <h1>📋 품질팀 주간 스케줄 관리</h1>
-            <p>화면에서 언제든지 Ctrl+V로 캡처를 붙여넣어 일정을 자동 추가할 수 있습니다.<span id="ocrStatus"></span></p>
+            <h1>📋 품질팀 주간 스케줄 관리<span id="ocrStatus"></span></h1>
         </div>
         <div class="week-navigator">
             <div class="today-badge" id="todayDisplay">오늘: YYYY-MM-DD</div>
@@ -362,7 +360,6 @@
         let currentDate = new Date(todayReal);
         let sortedDates = [];
 
-        // 🔥 슬래시(/)를 제한 문자로 간주하므로 키 명칭 수정 완료
         let boardData = {
             "Frame 입고": {}, "QC 검수": {}, "ACM 검수": {}, "Packing Date": {}, "Factory Out Date": {},
             "연차 및 외근": {}, "DR 및 미팅": {}, "기타업무": {}
