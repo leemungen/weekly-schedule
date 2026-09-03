@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>품질팀 주간 스케줄 관리 시스템</title>
-    <!-- Tesseract.js (OCR 라이브러리) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    
-    <!-- Firebase SDK (v9/v10 Compat 모드) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -21,117 +18,48 @@
             --text-main: #0f172a;
             --text-muted: #64748b;
             
-            --process-frame: #ecfdf5;
-            --process-frame-border: #10b981;
-            --process-qc: #eff6ff;
-            --process-qc-border: #3b82f6;
-            --process-acm: #f5f3ff;
-            --process-acm-border: #8b5cf6;
-            --process-pack: #fff7ed;
-            --process-pack-border: #f97316;
-            --process-out: #fef2f2;
-            --process-out-border: #ef4444;
-
-            --process-leave-field: #fdf2f8;
-            --process-leave-field-border: #ec4899;
-            --process-dr-meeting: #f0fdf4;
-            --process-dr-meeting-border: #16a34a;
-            --process-etc: #f8fafc;
-            --process-etc-border: #64748b;
+            --process-frame: #ecfdf5; --process-frame-border: #10b981;
+            --process-qc: #eff6ff; --process-qc-border: #3b82f6;
+            --process-acm: #f5f3ff; --process-acm-border: #8b5cf6;
+            --process-pack: #fff7ed; --process-pack-border: #f97316;
+            --process-out: #fef2f2; --process-out-border: #ef4444;
+            --process-leave-field: #fdf2f8; --process-leave-field-border: #ec4899;
+            --process-dr-meeting: #f0fdf4; --process-dr-meeting-border: #16a34a;
+            --process-etc: #f8fafc; --process-etc-border: #64748b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
 
         .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 16px 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-bg); padding: 16px 20px; border-radius: 12px;
+            border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            flex-wrap: wrap; gap: 10px;
         }
 
-        .title-area h1 { font-size: 22px; font-weight: 700; color: #1e293b; }
-
-        .week-navigator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .title-area h1 { font-size: 23px; font-weight: 700; color: #1e293b; }
+        .week-navigator { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        
+        /* 1. 검색창 스타일 */
+        .search-input {
+            padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 13px; outline: none; width: 180px; transition: border-color 0.2s;
         }
+        .search-input:focus { border-color: var(--primary); }
 
-        .today-badge {
-            background: #eff6ff;
-            color: var(--primary-dark);
-            border: 1px solid #bfdbfe;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .nav-btn {
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            color: #334155;
-            transition: all 0.2s;
-        }
-
+        .today-badge { background: #eff6ff; color: var(--primary-dark); border: 1px solid #bfdbfe; padding: 5px 10px; border-radius: 6px; font-size: 14px; font-weight: 700; }
+        .nav-btn { background: #ffffff; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; color: #334155; transition: all 0.2s; }
         .nav-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
         .nav-btn.today { background: var(--primary); color: white; border-color: var(--primary); }
         .nav-btn.today:hover { background: var(--primary-dark); }
-
-        .save-btn {
-            background: #16a34a;
-            color: white;
-            border: 1px solid #15803d;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+        .save-btn { background: #16a34a; color: white; border: 1px solid #15803d; padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
         .save-btn:hover { background: #15803d; }
+        .current-week-display { font-size: 16px; font-weight: 700; color: #1e293b; min-width: 150px; text-align: center; }
+        #ocrStatus { font-size: 13px; font-weight: 600; color: var(--primary-dark); margin-left: 10px; }
 
-        .current-week-display {
-            font-size: 15px;
-            font-weight: 700;
-            color: #1e293b;
-            min-width: 150px;
-            text-align: center;
-        }
-
-        #ocrStatus {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--primary-dark);
-            margin-left: 10px;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .metric-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 10px 12px;
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-
+        .metrics-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; margin-bottom: 16px; }
+        .metric-card { background: var(--card-bg); border-radius: 8px; padding: 10px 12px; border-left: 4px solid var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
         .metric-card.frame { border-left-color: var(--process-frame-border); }
         .metric-card.qc { border-left-color: var(--process-qc-border); }
         .metric-card.acm { border-left-color: var(--process-acm-border); }
@@ -140,90 +68,57 @@
         .metric-card.leave-field { border-left-color: var(--process-leave-field-border); }
         .metric-card.dr-meeting { border-left-color: var(--process-dr-meeting-border); }
         .metric-card.etc { border-left-color: var(--process-etc-border); }
-
-        .metric-title { font-size: 11px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
+        .metric-title { font-size: 12px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
         .metric-value-group { margin-top: 4px; }
-        .metric-weekly { font-size: 15px; font-weight: 700; color: #0f172a; }
-        .metric-daily { font-size: 11px; font-weight: 600; color: #2563eb; margin-top: 1px; }
+        .metric-weekly { font-size: 16px; font-weight: 700; color: #0f172a; }
+        .metric-daily { font-size: 12px; font-weight: 600; color: #2563eb; margin-top: 1px; }
 
-        .board-container {
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-            overflow-x: auto;
-            border: 1px solid var(--border-color);
-        }
-
-        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        .board-container { background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow-x: auto; border: 1px solid var(--border-color); }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 2200px; }
         th, td { border: 1px solid var(--border-color); padding: 8px; vertical-align: top; }
-        th { background-color: #f1f5f9; font-size: 13px; font-weight: 600; text-align: center; }
+        th { background-color: #f1f5f9; font-size: 14px; font-weight: 600; text-align: center; }
         th.is-today-col { background-color: #e0f2fe !important; border-bottom: 2px solid #0284c7; }
 
         .col-process { width: 140px; background-color: #f8fafc; text-align: center; font-weight: 700; }
-        .col-day { width: 12.2%; min-width: 130px; }
+        .col-day { min-width: 290px; }
 
-        .date-header { font-size: 13px; font-weight: 700; }
-        .day-sub { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+        .cell-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; align-items: start; min-height: 80px; padding: 2px; }
+        .cell-container .add-task-btn { grid-column: span 2; }
+        .cell-container.drag-over { background-color: #eff6ff; border-radius: 4px; outline: 2px dashed #3b82f6; }
+        
+        .cell-container.single-column { grid-template-columns: 1fr; }
+        .cell-container.single-column .item-card { grid-column: span 1; }
+        .cell-container.single-column .add-task-btn { grid-column: span 1; }
 
-        .item-card {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 8px;
-            margin-bottom: 6px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-            font-size: 12px;
-            position: relative;
+        .date-header { font-size: 14px; font-weight: 700; }
+        .day-sub { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+
+        /* 2. 카드 & 드래그앤드롭 스타일 */
+        .item-card { 
+            background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; 
+            padding: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); font-size: 13px; position: relative; 
+            cursor: grab; transition: all 0.2s ease;
         }
+        .item-card:active { cursor: grabbing; }
+        .item-card.dragging { opacity: 0.4; border: 2px dashed var(--primary); }
+        .item-card.highlight { border-color: #f59e0b; background-color: #fef3c7; }
+        .item-card.hidden { display: none !important; }
 
-        .editable-textarea {
-            width: 100%;
-            height: 54px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            padding: 4px 6px;
-            font-size: 11px;
-            line-height: 1.4;
-            margin-bottom: 4px;
-            outline: none;
-            resize: vertical;
-            font-family: inherit;
+        /* 3. 자동 높이 조절 Textarea */
+        .editable-textarea { 
+            width: 100%; min-height: 52px; border: 1px solid #cbd5e1; border-radius: 4px; 
+            padding: 4px 6px; font-size: 12px; line-height: 1.3; margin-bottom: 4px; outline: none; 
+            resize: none; font-family: inherit; overflow: hidden; box-sizing: border-box;
         }
+        
+        .assignee-input-group { display: flex; align-items: center; gap: 2px; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; width: 100%; }
+        .assignee-label { font-size: 11px; font-weight: 700; color: #475569; white-space: nowrap; flex-shrink: 0; }
+        .assignee-input { width: 100%; border: none; background: transparent; font-size: 11px; font-weight: 600; outline: none; color: #1e293b; }
+        .delete-btn { position: absolute; top: 2px; right: 4px; background: none; border: none; color: #ef4444; font-size: 15px; cursor: pointer; z-index: 10; }
+        .add-task-btn { width: 100%; background: #f1f5f9; border: 1px dashed #94a3b8; color: #475569; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; margin-top: 2px; }
 
-        .assignee-input-group {
-            display: flex;
-            align-items: center;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            gap: 4px;
-            background: #f1f5f9;
-            padding: 3px 6px;
-            border-radius: 4px;
-            width: 100%;
-        }
-
-        .assignee-label { 
-            font-size: 10px; 
-            font-weight: 700; 
-            color: #475569; 
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .assignee-input { 
-            width: 100%; 
-            border: none; 
-            background: transparent; 
-            font-size: 11px; 
-            font-weight: 600; 
-            outline: none;
-            color: #1e293b;
-        }
-
-        .delete-btn { position: absolute; top: 2px; right: 4px; background: none; border: none; color: #ef4444; font-size: 14px; cursor: pointer; }
-        .add-task-btn { width: 100%; background: #f1f5f9; border: 1px dashed #94a3b8; color: #475569; border-radius: 4px; padding: 3px; font-size: 11px; cursor: pointer; }
-
-        .badge-process { display: inline-block; padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; text-align: center; width: 100%; }
+        .badge-process { display: inline-block; padding: 4px 6px; border-radius: 4px; font-size: 12px; font-weight: 700; text-align: center; width: 100%; }
         .badge-frame { background: var(--process-frame); color: #065f46; border: 1px solid var(--process-frame-border); }
         .badge-qc { background: var(--process-qc); color: #1e40af; border: 1px solid var(--process-qc-border); }
         .badge-acm { background: var(--process-acm); color: #5b21b6; border: 1px solid var(--process-acm-border); }
@@ -232,18 +127,18 @@
         .badge-leave-field { background: var(--process-leave-field); color: #be185d; border: 1px solid var(--process-leave-field-border); }
         .badge-dr-meeting { background: var(--process-dr-meeting); color: #15803d; border: 1px solid var(--process-dr-meeting-border); }
         .badge-etc { background: var(--process-etc); color: #334155; border: 1px solid var(--process-etc-border); }
-        
-        .ocr-tag { display: inline-block; font-size: 9px; background: #fef3c7; color: #92400e; padding: 1px 4px; border-radius: 3px; margin-bottom: 4px; font-weight: 600; }
-        .editable-tag { display: inline-block; font-size: 9px; background: #dbeafe; color: #1e40af; padding: 1px 4px; border-radius: 3px; margin-bottom: 4px; font-weight: 600; }
+        .ocr-tag { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 1px 4px; border-radius: 3px; margin-bottom: 4px; font-weight: 600; }
     </style>
 </head>
 <body>
-
     <div class="header-container">
         <div class="title-area">
             <h1>📋 품질팀 주간 스케줄 관리<span id="ocrStatus"></span></h1>
         </div>
         <div class="week-navigator">
+            <!-- 1. 검색 및 필터 입력 영역 -->
+            <input type="text" id="searchInput" class="search-input" oninput="filterTasks()" placeholder="🔍 담당자/내용 검색...">
+            
             <div class="today-badge" id="todayDisplay">오늘: YYYY-MM-DD</div>
             <button class="nav-btn" onclick="changeWeek(-7)">◀ 이전주</button>
             <button class="nav-btn today" onclick="goToday()">오늘주차</button>
@@ -254,62 +149,14 @@
     </div>
 
     <div class="metrics-grid">
-        <div class="metric-card frame">
-            <div class="metric-title">Frame 입고</div>
-            <div class="metric-value-group">
-                <div class="metric-weekly" id="count-frame-weekly">주간 0건</div>
-                <div class="metric-daily" id="count-frame-daily">오늘 0건</div>
-            </div>
-        </div>
-        <div class="metric-card qc">
-            <div class="metric-title">QC 검수</div>
-            <div class="metric-value-group">
-                <div class="metric-weekly" id="count-qc-weekly">주간 0건</div>
-                <div class="metric-daily" id="count-qc-daily">오늘 0건</div>
-            </div>
-        </div>
-        <div class="metric-card acm">
-            <div class="metric-title">ACM 검수</div>
-            <div class="metric-value-group">
-                <div class="metric-weekly" id="count-acm-weekly">주간 0건</div>
-                <div class="metric-daily" id="count-acm-daily">오늘 0건</div>
-            </div>
-        </div>
-        <div class="metric-card pack">
-            <div class="metric-title">Packing</div>
-            <div class="metric-value-group">
-                <div class="metric-weekly" id="count-pack-weekly">주간 0건</div>
-                <div class="metric-daily" id="count-pack-daily">오늘 0건</div>
-            </div>
-        </div>
-        <div class="metric-card out">
-            <div class="metric-title">Factory Out</div>
-            <div class="metric-value-group">
-                <div class="metric-weekly" id="count-out-weekly">주간 0건</div>
-                <div class="metric-daily" id="count-out-daily">오늘 0건</div>
-            </div>
-        </div>
-        <div class="metric-card leave-field">
-            <div class="metric-title">연차 및 외근</div>
-            <div class="metric-value-group">
-                <div class="metric-weekly" id="count-leave-field-weekly">주간 0건</div>
-                <div class="metric-daily" id="count-leave-field-daily">오늘 0건</div>
-            </div>
-        </div>
-        <div class="metric-card dr-meeting">
-            <div class="metric-title">DR 및 미팅</div>
-            <div class="metric-value-group">
-                <div class="metric-weekly" id="count-dr-meeting-weekly">주간 0건</div>
-                <div class="metric-daily" id="count-dr-meeting-daily">오늘 0건</div>
-            </div>
-        </div>
-        <div class="metric-card etc">
-            <div class="metric-title">기타업무</div>
-            <div class="metric-value-group">
-                <div class="metric-weekly" id="count-etc-weekly">주간 0건</div>
-                <div class="metric-daily" id="count-etc-daily">오늘 0건</div>
-            </div>
-        </div>
+        <div class="metric-card frame"><div class="metric-title">Frame 입고</div><div class="metric-value-group"><div class="metric-weekly" id="count-frame-weekly">주간 0건</div><div class="metric-daily" id="count-frame-daily">오늘 0건</div></div></div>
+        <div class="metric-card qc"><div class="metric-title">QC 검수</div><div class="metric-value-group"><div class="metric-weekly" id="count-qc-weekly">주간 0건</div><div class="metric-daily" id="count-qc-daily">오늘 0건</div></div></div>
+        <div class="metric-card acm"><div class="metric-title">ACM 검수</div><div class="metric-value-group"><div class="metric-weekly" id="count-acm-weekly">주간 0건</div><div class="metric-daily" id="count-acm-daily">오늘 0건</div></div></div>
+        <div class="metric-card pack"><div class="metric-title">Packing</div><div class="metric-value-group"><div class="metric-weekly" id="count-pack-weekly">주간 0건</div><div class="metric-daily" id="count-pack-daily">오늘 0건</div></div></div>
+        <div class="metric-card out"><div class="metric-title">Factory Out</div><div class="metric-value-group"><div class="metric-weekly" id="count-out-weekly">주간 0건</div><div class="metric-daily" id="count-out-daily">오늘 0건</div></div></div>
+        <div class="metric-card leave-field"><div class="metric-title">연차 및 외근</div><div class="metric-value-group"><div class="metric-weekly" id="count-leave-field-weekly">주간 0건</div><div class="metric-daily" id="count-leave-field-daily">오늘 0건</div></div></div>
+        <div class="metric-card dr-meeting"><div class="metric-title">DR 및 미팅</div><div class="metric-value-group"><div class="metric-weekly" id="count-dr-meeting-weekly">주간 0건</div><div class="metric-daily" id="count-dr-meeting-daily">오늘 0건</div></div></div>
+        <div class="metric-card etc"><div class="metric-title">기타업무</div><div class="metric-value-group"><div class="metric-weekly" id="count-etc-weekly">주간 0건</div><div class="metric-daily" id="count-etc-daily">오늘 0건</div></div></div>
     </div>
 
     <div class="board-container">
@@ -344,7 +191,6 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const scheduleRef = database.ref("weekly_schedule");
-
         const teamMembers = ["이문근P", "양승현P", "권대협P", "김민수P", "박준형P", "품질팀 전체", "미배정"];
 
         function getFormattedDate(dateObj) {
@@ -356,7 +202,6 @@
 
         const todayReal = new Date();
         const todayStr = getFormattedDate(todayReal);
-
         let currentDate = new Date(todayReal);
         let sortedDates = [];
 
@@ -367,25 +212,15 @@
 
         scheduleRef.on("value", (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                boardData = data;
-                renderBoard();
-            }
+            if (data) { boardData = data; renderBoard(); }
         });
 
-        function autoSave() {
-            scheduleRef.set(boardData);
-        }
-
-        function manualSave() {
-            autoSave();
-            alert("🌐 데이터베이스에 정상 저장이 완료되었습니다!");
-        }
+        function autoSave() { scheduleRef.set(boardData); }
+        function manualSave() { autoSave(); alert("🌐 데이터베이스에 정상 저장이 완료되었습니다!"); }
 
         function initTodayBadge() {
             const days = ['일', '월', '화', '수', '목', '금', '토'];
-            const dayName = days[todayReal.getDay()];
-            document.getElementById("todayDisplay").innerText = `📅 오늘: ${todayStr} (${dayName})`;
+            document.getElementById("todayDisplay").innerText = `📅 오늘: ${todayStr} (${days[todayReal.getDay()]})`;
         }
 
         function updateWeekDates(baseDate) {
@@ -393,7 +228,6 @@
             let temp = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
             let day = temp.getDay();
             let diff = temp.getDate() - day + (day === 0 ? -6 : 1);
-            
             let monday = new Date(temp.setDate(diff));
 
             for (let i = 0; i < 7; i++) {
@@ -405,26 +239,17 @@
             const month = monday.getMonth() + 1;
             const weekNum = Math.ceil(monday.getDate() / 7);
             document.getElementById("weekDisplay").innerText = `${year}년 ${String(month).padStart(2, '0')}월 ${weekNum}주차`;
-
             renderBoard();
         }
 
-        function changeWeek(days) {
-            currentDate.setDate(currentDate.getDate() + days);
-            updateWeekDates(currentDate);
-        }
-
-        function goToday() {
-            currentDate = new Date(todayReal.getFullYear(), todayReal.getMonth(), todayReal.getDate());
-            updateWeekDates(currentDate);
-        }
+        function changeWeek(days) { currentDate.setDate(currentDate.getDate() + days); updateWeekDates(currentDate); }
+        function goToday() { currentDate = new Date(todayReal.getFullYear(), todayReal.getMonth(), todayReal.getDate()); updateWeekDates(currentDate); }
 
         window.addEventListener('paste', e => {
             const items = e.clipboardData.items;
             for (let i = 0; i < items.length; i++) {
                 if (items[i].type.indexOf('image') !== -1) {
-                    const blob = items[i].getAsFile();
-                    processImageFile(blob);
+                    processImageFile(items[i].getAsFile());
                     break;
                 }
             }
@@ -433,12 +258,10 @@
         async function processImageFile(file) {
             const statusEl = document.getElementById("ocrStatus");
             statusEl.innerText = " ⏳ [캡처 분석 중...]";
-
             try {
                 const worker = await Tesseract.createWorker('kor+eng');
                 const ret = await worker.recognize(file);
                 await worker.terminate();
-
                 statusEl.innerText = " ✅ [반영 완료]";
                 setTimeout(() => statusEl.innerText = "", 3000);
                 parseExtractedText(ret.data.text);
@@ -449,20 +272,16 @@
 
         function parseExtractedText(text) {
             const lines = text.split('\n');
-
             lines.forEach(line => {
                 const trimmed = line.trim();
                 if (!trimmed) return;
-
                 const dateMatch = trimmed.match(/\b(202\d[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2})\b/);
-
                 let targetDate = sortedDates[0];
                 if (dateMatch) {
                     let dStr = dateMatch[0].replace(/\//g, '-');
                     if (dStr.length <= 5) dStr = currentDate.getFullYear() + "-" + dStr.padStart(5, '0');
                     if (sortedDates.includes(dStr)) targetDate = dStr;
                 }
-
                 let targetProc = "기타업무";
                 if (/frame|프레임/i.test(trimmed)) targetProc = "Frame 입고";
                 else if (/qc|검수/i.test(trimmed)) targetProc = "QC 검수";
@@ -473,13 +292,8 @@
                 else if (/dr|미팅|회의/i.test(trimmed)) targetProc = "DR 및 미팅";
 
                 if (!boardData[targetProc][targetDate]) boardData[targetProc][targetDate] = [];
-                boardData[targetProc][targetDate].push({
-                    content: trimmed,
-                    name: "이문근P",
-                    isOcr: true
-                });
+                boardData[targetProc][targetDate].push({ content: trimmed, name: "이문근P", isOcr: true });
             });
-
             autoSave();
         }
 
@@ -492,7 +306,6 @@
                 const dStr = sortedDates[idx] || "";
                 const displayDate = dStr ? dStr.substring(5).replace('-', '/') : '';
                 const thEl = document.getElementById(thIds[idx]);
-
                 if (dStr === todayStr) {
                     thEl.classList.add("is-today-col");
                     document.getElementById(id).innerHTML = `${displayDate} <br><span class="day-sub" style="font-weight:700; color:#0284c7;">${daysOfWeek[idx]} (오늘)</span>`;
@@ -503,25 +316,20 @@
             });
 
             const allProcesses = [
-                { key: "Frame 입고", name: "Frame 입고", badge: "badge-frame", idPrefix: "count-frame" },
-                { key: "QC 검수", name: "QC 검수", badge: "badge-qc", idPrefix: "count-qc" },
-                { key: "ACM 검수", name: "ACM 검수", badge: "badge-acm", idPrefix: "count-acm" },
-                { key: "Packing Date", name: "Packing Date", badge: "badge-pack", idPrefix: "count-pack" },
-                { key: "Factory Out Date", name: "Factory Out Date", badge: "badge-out", idPrefix: "count-out" },
-                { key: "연차 및 외근", name: "🏖️ 연차 및 외근", badge: "badge-leave-field", idPrefix: "count-leave-field" },
-                { key: "DR 및 미팅", name: "💬 DR 및 미팅", badge: "badge-dr-meeting", idPrefix: "count-dr-meeting" },
-                { key: "기타업무", name: "📌 기타업무", badge: "badge-etc", idPrefix: "count-etc" }
+                { key: "Frame 입고", name: "Frame 입고", badge: "badge-frame", idPrefix: "count-frame", singleColumn: false },
+                { key: "QC 검수", name: "QC 검수", badge: "badge-qc", idPrefix: "count-qc", singleColumn: false },
+                { key: "ACM 검수", name: "ACM 검수", badge: "badge-acm", idPrefix: "count-acm", singleColumn: false },
+                { key: "Packing Date", name: "Packing Date", badge: "badge-pack", idPrefix: "count-pack", singleColumn: false },
+                { key: "Factory Out Date", name: "Factory Out Date", badge: "badge-out", idPrefix: "count-out", singleColumn: false },
+                { key: "연차 및 외근", name: "🏖️ 연차 및 외근", badge: "badge-leave-field", idPrefix: "count-leave-field", singleColumn: false },
+                { key: "DR 및 미팅", name: "💬 DR 및 미팅", badge: "badge-dr-meeting", idPrefix: "count-dr-meeting", singleColumn: true },
+                { key: "기타업무", name: "📌 기타업무", badge: "badge-etc", idPrefix: "count-etc", singleColumn: true }
             ];
 
             const tbody = document.getElementById("boardBody");
             tbody.innerHTML = "";
-
-            let weeklyCounts = {};
-            let dailyCounts = {};
-            allProcesses.forEach(p => {
-                weeklyCounts[p.key] = 0;
-                dailyCounts[p.key] = 0;
-            });
+            let weeklyCounts = {}; let dailyCounts = {};
+            allProcesses.forEach(p => { weeklyCounts[p.key] = 0; dailyCounts[p.key] = 0; });
 
             allProcesses.forEach(p => {
                 let tr = document.createElement("tr");
@@ -532,28 +340,38 @@
 
                 sortedDates.forEach((dateStr) => {
                     let tdDay = document.createElement("td");
+                    let cellContainer = document.createElement("div");
+                    
+                    cellContainer.className = p.singleColumn ? "cell-container single-column" : "cell-container";
+                    cellContainer.setAttribute("data-proc", p.key);
+                    cellContainer.setAttribute("data-date", dateStr);
+                    
+                    // 2. 드래그 앤 드롭 이벤트 타겟 설정
+                    cellContainer.ondragover = handleDragOver;
+                    cellContainer.ondragleave = handleDragLeave;
+                    cellContainer.ondrop = handleDrop;
+
                     let list = (boardData[p.key] && boardData[p.key][dateStr]) ? boardData[p.key][dateStr] : [];
                     
                     weeklyCounts[p.key] += list.length;
-                    if (dateStr === todayStr) {
-                        dailyCounts[p.key] += list.length;
-                    }
+                    if (dateStr === todayStr) dailyCounts[p.key] += list.length;
 
                     list.forEach((item, idx) => {
                         let card = document.createElement("div");
                         card.className = "item-card";
+                        card.draggable = true;
+                        card.id = `card-${p.key}-${dateStr}-${idx}`;
                         
-                        let tagHtml = item.isOcr 
-                            ? `<span class="ocr-tag">📷 캡처 인식</span>` 
-                            : `<span class="editable-tag">직접 입력</span>`;
+                        card.ondragstart = (e) => handleDragStart(e, p.key, dateStr, idx);
+                        card.ondragend = handleDragEnd;
 
+                        let tagHtml = item.isOcr ? `<span class="ocr-tag">📷 캡처</span>` : '';
                         let contentVal = item.content !== undefined ? item.content : ((item.title || '') + (item.note ? '\n' + item.note : ''));
 
                         card.innerHTML = `
                             <button class="delete-btn" onclick="removeTask('${p.key}', '${dateStr}', ${idx})">×</button>
                             ${tagHtml}
-                            <textarea class="editable-textarea" placeholder="3줄 내외 내용 작성..." onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
-                            
+                            <textarea class="editable-textarea" placeholder="내용 작성..." oninput="autoResizeTextarea(this)" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
                             <div class="assignee-input-group">
                                 <span class="assignee-label">담당 :</span>
                                 <input type="text" class="assignee-input" list="team-list-${p.key}-${dateStr}-${idx}" value="${item.name || ''}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
@@ -562,15 +380,22 @@
                                 </datalist>
                             </div>
                         `;
-                        tdDay.appendChild(card);
+                        cellContainer.appendChild(card);
+                        
+                        // 렌더링 후 초기 높이 조절 실행
+                        setTimeout(() => {
+                            const ta = card.querySelector('textarea');
+                            if(ta) autoResizeTextarea(ta);
+                        }, 0);
                     });
 
                     let addBtn = document.createElement("button");
                     addBtn.className = "add-task-btn";
                     addBtn.innerText = "+ 추가";
                     addBtn.onclick = () => addTask(p.key, dateStr);
-                    tdDay.appendChild(addBtn);
+                    cellContainer.appendChild(addBtn);
 
+                    tdDay.appendChild(cellContainer);
                     tr.appendChild(tdDay);
                 });
                 tbody.appendChild(tr);
@@ -580,6 +405,87 @@
                 document.getElementById(`${p.idPrefix}-weekly`).innerText = `주간 ${weeklyCounts[p.key]}건`;
                 document.getElementById(`${p.idPrefix}-daily`).innerText = `오늘 ${dailyCounts[p.key]}건`;
             });
+
+            filterTasks(); // 렌더링 후 검색 필터 재적용
+        }
+
+        // 3. Textarea 높이 자동 조절 기능
+        function autoResizeTextarea(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        // 1. 검색 및 필터링 기능 implementation
+        function filterTasks() {
+            const query = document.getElementById("searchInput").value.toLowerCase().trim();
+            const cards = document.querySelectorAll(".item-card");
+
+            cards.forEach(card => {
+                const textVal = card.querySelector("textarea") ? card.querySelector("textarea").value.toLowerCase() : "";
+                const nameVal = card.querySelector(".assignee-input") ? card.querySelector(".assignee-input").value.toLowerCase() : "";
+
+                if (query === "") {
+                    card.classList.remove("hidden", "highlight");
+                } else if (textVal.includes(query) || nameVal.includes(query)) {
+                    card.classList.remove("hidden");
+                    card.classList.add("highlight");
+                } else {
+                    card.classList.add("hidden");
+                    card.classList.remove("highlight");
+                }
+            });
+        }
+
+        // 2. 드래그 앤 드롭 (Drag and Drop) 로직
+        let draggedItemInfo = null;
+
+        function handleDragStart(e, procKey, dateStr, idx) {
+            draggedItemInfo = { procKey, dateStr, idx };
+            e.target.classList.add("dragging");
+            e.dataTransfer.setData("text/plain", JSON.stringify(draggedItemInfo));
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove("dragging");
+            document.querySelectorAll(".cell-container").forEach(c => c.classList.remove("drag-over"));
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const container = e.currentTarget;
+            container.classList.add("drag-over");
+        }
+
+        function handleDragLeave(e) {
+            const container = e.currentTarget;
+            container.classList.remove("drag-over");
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const container = e.currentTarget;
+            container.classList.remove("drag-over");
+
+            const targetProc = container.getAttribute("data-proc");
+            const targetDate = container.getAttribute("data-date");
+
+            if (!draggedItemInfo) return;
+
+            const { procKey, dateStr, idx } = draggedItemInfo;
+
+            // 동일 위치 드롭 시 무시
+            if (procKey === targetProc && dateStr === targetDate) return;
+
+            // 이전 위치 데이터 추출 및 제거
+            const movedItem = boardData[procKey][dateStr].splice(idx, 1)[0];
+
+            // 새로운 위치 데이터 삽입
+            if (!boardData[targetProc]) boardData[targetProc] = {};
+            if (!boardData[targetProc][targetDate]) boardData[targetProc][targetDate] = [];
+            boardData[targetProc][targetDate].push(movedItem);
+
+            draggedItemInfo = null;
+            autoSave(); // 변경 데이터 저장 및 자동 렌더링
         }
 
         function addTask(procKey, dateStr) {
