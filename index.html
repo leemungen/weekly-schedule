@@ -284,7 +284,23 @@
         const database = firebase.database();
         const scheduleRef = database.ref("weekly_schedule");
 
-        const teamMembers = [
+        const EDIT_PASSWORD = "3697";
+let editMode = false;
+
+function requestEditPermission() {
+    if (editMode) return true;
+    const password = prompt("🔒 일정 수정/작성 비밀번호를 입력하세요.");
+    if (password === EDIT_PASSWORD) {
+        editMode = true;
+        document.body.classList.add("edit-enabled");
+        renderBoard();
+        return true;
+    }
+    if (password !== null) alert("❌ 비밀번호가 올바르지 않습니다.");
+    return false;
+}
+
+const teamMembers = [
             "신형근", "이문근", "권대협", "양승현", 
             "곽승범", "김수원", "김나현", "이우진", 
             "윤대석", "이현지", "임창섭", "품질팀 전체", "미배정"
@@ -314,7 +330,11 @@
         });
 
         function autoSave() { scheduleRef.set(boardData); }
-        function manualSave() { autoSave(); alert("🌐 데이터베이스에 정상 저장이 완료되었습니다!"); }
+        function manualSave() {
+    if (!requestEditPermission()) return;
+    autoSave();
+    alert("🌐 데이터베이스에 정상 저장이 완료되었습니다!");
+}
 
         function initTodayBadge() {
             const days = ['일', '월', '화', '수', '목', '금', '토'];
@@ -515,10 +535,10 @@
                         card.innerHTML = `
                             <button class="delete-btn" onclick="removeTask('${p.key}', '${dateStr}', ${idx})">×</button>
                             ${tagHtml}
-                            <textarea class="editable-textarea" placeholder="내용 작성..." oninput="autoResizeTextarea(this)" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
+                            <textarea class="editable-textarea" ${editMode ? "" : "readonly"} placeholder="내용 작성..." oninput="autoResizeTextarea(this)" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
                             <div class="assignee-input-group">
                                 <span class="assignee-label">${labelText}</span>
-                                <input type="text" class="assignee-input" list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
+                                <input type="text" class="assignee-input" ${editMode ? "" : "readonly"} list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
                                 <datalist id="team-list-${p.key}-${dateStr}-${idx}">
                                     ${teamMembers.map(m => `<option value="${m}">`).join('')}
                                 </datalist>
@@ -534,7 +554,7 @@
 
                     let addBtn = document.createElement("button");
                     addBtn.className = "add-task-btn";
-                    addBtn.innerText = "+ 추가";
+                    addBtn.innerText = editMode ? "+ 추가" : "🔒 수정";
                     addBtn.onclick = () => addTask(p.key, dateStr);
                     cellContainer.appendChild(addBtn);
 
@@ -580,6 +600,7 @@
         let draggedItemInfo = null;
 
         function handleDragStart(e, procKey, dateStr, idx) {
+            if (!requestEditPermission()) { e.preventDefault(); return; }
             draggedItemInfo = { procKey, dateStr, idx };
             e.target.classList.add("dragging");
             e.dataTransfer.setData("text/plain", JSON.stringify(draggedItemInfo));
@@ -626,6 +647,7 @@
         }
 
         function addTask(procKey, dateStr) {
+            if (!requestEditPermission()) return;
             if (!boardData[procKey]) boardData[procKey] = {};
             if (!boardData[procKey][dateStr]) boardData[procKey][dateStr] = [];
             boardData[procKey][dateStr].push({ content: "", name: "", isOcr: false });
@@ -633,6 +655,7 @@
         }
 
         function removeTask(procKey, dateStr, idx) {
+            if (!requestEditPermission()) return;
             if (boardData[procKey] && boardData[procKey][dateStr]) {
                 boardData[procKey][dateStr].splice(idx, 1);
                 autoSave();
@@ -640,6 +663,7 @@
         }
 
         function updateTask(procKey, dateStr, idx, field, val) {
+            if (!requestEditPermission()) { renderBoard(); return; }
             if (boardData[procKey] && boardData[procKey][dateStr] && boardData[procKey][dateStr][idx]) {
                 boardData[procKey][dateStr][idx][field] = val;
                 autoSave();
