@@ -402,31 +402,16 @@
             autoSave();
         }
 
-        // 여러 명 다중 담당자 선택 처리 함수
-        function handleMultiAssigneeInput(inputEl, procKey, dateStr, idx) {
-            let val = inputEl.value;
-            const parts = val.split(',').map(s => s.trim());
-            const lastPart = parts[parts.length - 1];
-
-            // 사용자가 선택 목록(datalist) 중 한 사람의 이름을 완벽히 선택한 경우
-            if (teamMembers.includes(lastPart)) {
-                // 이전에 선택된 이름들과 새로 선택한 이름을 조합하여 '이름1, 이름2, ' 형태로 변환
-                const uniqueNames = Array.from(new Set(parts.filter(p => teamMembers.includes(p))));
-                inputEl.value = uniqueNames.join(', ') + ', ';
-            }
-
-            updateTask(procKey, dateStr, idx, 'name', inputEl.value);
-        }
-
         function renderBoard() {
             const daysOfWeek = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"];
             const headerIds = ["date-mon", "date-tue", "date-wed", "date-thu", "date-fri", "date-sat", "date-sun"];
             const thIds = ["th-mon", "th-tue", "th-wed", "th-thu", "th-fri", "th-sat", "th-sun"];
             
+            // 일간 보기 모드 시 오늘 포함 3일간의 날짜 목록을 구함
             let visibleDailyDates = [];
             if (currentViewMode === 'daily') {
                 let baseIdx = sortedDates.indexOf(todayStr);
-                if (baseIdx === -1) baseIdx = 0;
+                if (baseIdx === -1) baseIdx = 0; // 주차가 달라 오늘이 없을 경우 첫 번째 날 기준
                 visibleDailyDates = sortedDates.slice(baseIdx, baseIdx + 3);
             }
 
@@ -533,7 +518,7 @@
                             <textarea class="editable-textarea" placeholder="내용 작성..." oninput="autoResizeTextarea(this)" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
                             <div class="assignee-input-group">
                                 <span class="assignee-label">${labelText}</span>
-                                <input type="text" class="assignee-input" list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" placeholder="담당자 다중선택..." oninput="handleMultiAssigneeInput(this, '${p.key}', '${dateStr}', ${idx})" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
+                                <input type="text" class="assignee-input" list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
                                 <datalist id="team-list-${p.key}-${dateStr}-${idx}">
                                     ${teamMembers.map(m => `<option value="${m}">`).join('')}
                                 </datalist>
