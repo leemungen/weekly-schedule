@@ -35,26 +35,89 @@
             display: flex; justify-content: space-between; align-items: center;
             background: var(--card-bg); padding: 16px 20px; border-radius: 12px;
             border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-            flex-wrap: wrap; gap: 10px;
+            flex-wrap: wrap; gap: 16px;
         }
 
+        .title-area { display: flex; flex-direction: column; gap: 8px; }
         .title-area h1 { font-size: 23px; font-weight: 700; color: #1e293b; }
-        .week-navigator { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        
+
+        .week-navigator { 
+            display: flex; 
+            align-items: center; 
+            gap: 16px; 
+            flex-wrap: wrap; 
+        }
+
+        .nav-controls-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: stretch;
+        }
+
+        .action-top-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-bottom-row {
+            width: 100%;
+        }
+
+        .col-process-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .filter-select {
+            padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 12px; outline: none; background-color: #ffffff; font-weight: 600; color: #334155;
+            cursor: pointer; transition: border-color 0.2s; width: 100%;
+        }
+        .filter-select:focus { border-color: var(--primary); }
+
+        .view-mode-group {
+            display: inline-flex; background: #e2e8f0; padding: 2px; border-radius: 8px; gap: 2px; align-self: flex-start;
+        }
+        .view-mode-btn {
+            border: none; background: transparent; padding: 6px 12px; font-size: 13px;
+            font-weight: 700; border-radius: 6px; cursor: pointer; color: #64748b; transition: all 0.2s;
+        }
+        .view-mode-btn.active {
+            background: #ffffff; color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
         .search-input {
-            padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
-            font-size: 13px; outline: none; width: 180px; transition: border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 6px 12px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px;
+            font-size: 13px; 
+            outline: none; 
+            transition: border-color 0.2s;
         }
         .search-input:focus { border-color: var(--primary); }
 
-        .today-badge { background: #eff6ff; color: var(--primary-dark); border: 1px solid #bfdbfe; padding: 5px 10px; border-radius: 6px; font-size: 14px; font-weight: 700; }
-        .nav-btn { background: #ffffff; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; color: #334155; transition: all 0.2s; }
+        .today-badge { background: #eff6ff; color: var(--primary-dark); border: 1px solid #bfdbfe; padding: 5px 10px; border-radius: 6px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+        .nav-btn { background: #ffffff; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; color: #334155; transition: all 0.2s; white-space: nowrap; }
         .nav-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
         .nav-btn.today { background: var(--primary); color: white; border-color: var(--primary); }
         .nav-btn.today:hover { background: var(--primary-dark); }
-        .save-btn { background: #16a34a; color: white; border: 1px solid #15803d; padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .save-btn { background: #16a34a; color: white; border: 1px solid #15803d; padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
         .save-btn:hover { background: #15803d; }
-        .current-week-display { font-size: 16px; font-weight: 700; color: #1e293b; min-width: 150px; text-align: center; }
+        .current-week-display { font-size: 15px; font-weight: 700; color: #1e293b; text-align: center; }
         #ocrStatus { font-size: 13px; font-weight: 600; color: var(--primary-dark); margin-left: 10px; }
 
         .metrics-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; margin-bottom: 16px; }
@@ -74,13 +137,14 @@
 
         .board-container { background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow-x: auto; border: 1px solid var(--border-color); }
         
-        table { width: 100%; border-collapse: collapse; min-width: 2200px; }
+        table { width: 100%; border-collapse: collapse; min-width: 100%; }
         th, td { border: 1px solid var(--border-color); padding: 8px; vertical-align: top; }
         th { background-color: #f1f5f9; font-size: 14px; font-weight: 600; text-align: center; }
         th.is-today-col { background-color: #e0f2fe !important; border-bottom: 2px solid #0284c7; }
 
-        .col-process { width: 140px; background-color: #f8fafc; text-align: center; font-weight: 700; }
-        .col-day { min-width: 290px; }
+        .col-process { width: 150px; background-color: #f8fafc; text-align: center; font-weight: 700; }
+        .col-day { min-width: 180px; }
+        .col-day.show-3days { min-width: 280px; width: 28%; }
 
         .cell-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; align-items: start; min-height: 80px; padding: 2px; }
         .cell-container .add-task-btn { grid-column: span 2; }
@@ -125,22 +189,39 @@
         .badge-dr-meeting { background: var(--process-dr-meeting); color: #15803d; border: 1px solid var(--process-dr-meeting-border); }
         .badge-etc { background: var(--process-etc); color: #334155; border: 1px solid var(--process-etc-border); }
         .ocr-tag { display: inline-block; font-size: 10px; background: #fef3c7; color: #92400e; padding: 1px 4px; border-radius: 3px; margin-bottom: 4px; font-weight: 600; }
+        
+        .hidden-col { display: none !important; }
     </style>
 </head>
 <body>
     <div class="header-container">
         <div class="title-area">
-            <h1>📋 품질팀 주간 스케줄 관리<span id="ocrStatus"></span></h1>
+            <h1>📋 품질팀 스케줄 관리<span id="ocrStatus"></span></h1>
+            <div class="view-mode-group">
+                <button class="view-mode-btn active" id="btnViewDaily" onclick="setViewMode('daily')">📅 일간 보기 (3일)</button>
+                <button class="view-mode-btn" id="btnViewWeekly" onclick="setViewMode('weekly')">🗓️ 주간 보기</button>
+            </div>
         </div>
+
         <div class="week-navigator">
-            <input type="text" id="searchInput" class="search-input" oninput="filterTasks()" placeholder="🔍 담당자/내용 검색...">
-            
-            <div class="today-badge" id="todayDisplay">오늘: YYYY-MM-DD</div>
-            <button class="nav-btn" onclick="changeWeek(-7)">◀ 이전주</button>
-            <button class="nav-btn today" onclick="goToday()">오늘주차</button>
-            <button class="nav-btn" onclick="changeWeek(7)">다음주 ▶</button>
-            <span class="current-week-display" id="weekDisplay">2026년 08월 4주차</span>
-            <button class="save-btn" onclick="manualSave()">💾 저장하기</button>
+            <div class="nav-controls-group">
+                <span class="current-week-display" id="weekDisplay">2026년 09월 1주차</span>
+                <div style="display: flex; gap: 6px;">
+                    <button class="nav-btn" onclick="changeWeek(-7)">◀ 이전주</button>
+                    <button class="nav-btn today" onclick="goToday()">오늘주차</button>
+                    <button class="nav-btn" onclick="changeWeek(7)">다음주 ▶</button>
+                </div>
+            </div>
+
+            <div class="action-group">
+                <div class="action-top-row">
+                    <div class="today-badge" id="todayDisplay">오늘: YYYY-MM-DD</div>
+                    <button class="save-btn" onclick="manualSave()">💾 저장하기</button>
+                </div>
+                <div class="action-bottom-row">
+                    <input type="text" id="searchInput" class="search-input" oninput="filterTasks()" placeholder="🔍 담당자/내용 검색...">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -159,7 +240,22 @@
         <table>
             <thead>
                 <tr>
-                    <th class="col-process">공정 / 업무구분</th>
+                    <th class="col-process">
+                        <div class="col-process-header">
+                            <span>업무구분</span>
+                            <select id="processFilter" class="filter-select" onchange="renderBoard()">
+                                <option value="ALL">⚙️ 전체 보기</option>
+                                <option value="Frame 입고">Frame 입고</option>
+                                <option value="QC 검수">QC 검수</option>
+                                <option value="ACM 검수">ACM 검수</option>
+                                <option value="Packing Date">Packing Date</option>
+                                <option value="Factory Out Date">Factory Out Date</option>
+                                <option value="연차 및 외근">연차 및 외근</option>
+                                <option value="DR 및 미팅">DR 및 미팅</option>
+                                <option value="기타업무">기타업무</option>
+                            </select>
+                        </div>
+                    </th>
                     <th class="col-day" id="th-mon"><div class="date-header" id="date-mon">월요일</div></th>
                     <th class="col-day" id="th-tue"><div class="date-header" id="date-tue">화요일</div></th>
                     <th class="col-day" id="th-wed"><div class="date-header" id="date-wed">수요일</div></th>
@@ -188,7 +284,6 @@
         const database = firebase.database();
         const scheduleRef = database.ref("weekly_schedule");
 
-        // 팀원 목록 업데이트 ('P' 제거)
         const teamMembers = [
             "신형근", "이문근", "권대협", "양승현", 
             "곽승범", "김수원", "김나현", "이우진", 
@@ -206,6 +301,7 @@
         const todayStr = getFormattedDate(todayReal);
         let currentDate = new Date(todayReal);
         let sortedDates = [];
+        let currentViewMode = 'daily';
 
         let boardData = {
             "Frame 입고": {}, "QC 검수": {}, "ACM 검수": {}, "Packing Date": {}, "Factory Out Date": {},
@@ -223,6 +319,13 @@
         function initTodayBadge() {
             const days = ['일', '월', '화', '수', '목', '금', '토'];
             document.getElementById("todayDisplay").innerText = `📅 오늘: ${todayStr} (${days[todayReal.getDay()]})`;
+        }
+
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            document.getElementById("btnViewDaily").classList.toggle("active", mode === 'daily');
+            document.getElementById("btnViewWeekly").classList.toggle("active", mode === 'weekly');
+            renderBoard();
         }
 
         function updateWeekDates(baseDate) {
@@ -299,15 +402,51 @@
             autoSave();
         }
 
+        // 여러 명 다중 담당자 선택 처리 함수
+        function handleMultiAssigneeInput(inputEl, procKey, dateStr, idx) {
+            let val = inputEl.value;
+            const parts = val.split(',').map(s => s.trim());
+            const lastPart = parts[parts.length - 1];
+
+            // 사용자가 선택 목록(datalist) 중 한 사람의 이름을 완벽히 선택한 경우
+            if (teamMembers.includes(lastPart)) {
+                // 이전에 선택된 이름들과 새로 선택한 이름을 조합하여 '이름1, 이름2, ' 형태로 변환
+                const uniqueNames = Array.from(new Set(parts.filter(p => teamMembers.includes(p))));
+                inputEl.value = uniqueNames.join(', ') + ', ';
+            }
+
+            updateTask(procKey, dateStr, idx, 'name', inputEl.value);
+        }
+
         function renderBoard() {
             const daysOfWeek = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"];
             const headerIds = ["date-mon", "date-tue", "date-wed", "date-thu", "date-fri", "date-sat", "date-sun"];
             const thIds = ["th-mon", "th-tue", "th-wed", "th-thu", "th-fri", "th-sat", "th-sun"];
             
+            let visibleDailyDates = [];
+            if (currentViewMode === 'daily') {
+                let baseIdx = sortedDates.indexOf(todayStr);
+                if (baseIdx === -1) baseIdx = 0;
+                visibleDailyDates = sortedDates.slice(baseIdx, baseIdx + 3);
+            }
+
             headerIds.forEach((id, idx) => {
                 const dStr = sortedDates[idx] || "";
                 const displayDate = dStr ? dStr.substring(5).replace('-', '/') : '';
                 const thEl = document.getElementById(thIds[idx]);
+                
+                if (currentViewMode === 'daily') {
+                    if (visibleDailyDates.includes(dStr)) {
+                        thEl.classList.remove("hidden-col");
+                        thEl.classList.add("show-3days");
+                    } else {
+                        thEl.classList.add("hidden-col");
+                        thEl.classList.remove("show-3days");
+                    }
+                } else {
+                    thEl.classList.remove("hidden-col", "show-3days");
+                }
+
                 if (dStr === todayStr) {
                     thEl.classList.add("is-today-col");
                     document.getElementById(id).innerHTML = `${displayDate} <br><span class="day-sub" style="font-weight:700; color:#0284c7;">${daysOfWeek[idx]} (오늘)</span>`;
@@ -328,12 +467,24 @@
                 { key: "기타업무", name: "📌 기타업무", badge: "badge-etc", idPrefix: "count-etc", singleColumn: true }
             ];
 
+            const selectedProcFilter = document.getElementById("processFilter") ? document.getElementById("processFilter").value : "ALL";
+
             const tbody = document.getElementById("boardBody");
             tbody.innerHTML = "";
             let weeklyCounts = {}; let dailyCounts = {};
             allProcesses.forEach(p => { weeklyCounts[p.key] = 0; dailyCounts[p.key] = 0; });
 
             allProcesses.forEach(p => {
+                sortedDates.forEach((dateStr) => {
+                    let list = (boardData[p.key] && boardData[p.key][dateStr]) ? boardData[p.key][dateStr] : [];
+                    weeklyCounts[p.key] += list.length;
+                    if (dateStr === todayStr) dailyCounts[p.key] += list.length;
+                });
+
+                if (selectedProcFilter !== "ALL" && selectedProcFilter !== p.key) {
+                    return;
+                }
+
                 let tr = document.createElement("tr");
                 let tdProc = document.createElement("td");
                 tdProc.className = "col-process";
@@ -342,8 +493,16 @@
 
                 sortedDates.forEach((dateStr) => {
                     let tdDay = document.createElement("td");
-                    let cellContainer = document.createElement("div");
                     
+                    if (currentViewMode === 'daily') {
+                        if (!visibleDailyDates.includes(dateStr)) {
+                            tdDay.classList.add("hidden-col");
+                        } else {
+                            tdDay.classList.add("show-3days");
+                        }
+                    }
+
+                    let cellContainer = document.createElement("div");
                     cellContainer.className = p.singleColumn ? "cell-container single-column" : "cell-container";
                     cellContainer.setAttribute("data-proc", p.key);
                     cellContainer.setAttribute("data-date", dateStr);
@@ -353,9 +512,6 @@
                     cellContainer.ondrop = handleDrop;
 
                     let list = (boardData[p.key] && boardData[p.key][dateStr]) ? boardData[p.key][dateStr] : [];
-                    
-                    weeklyCounts[p.key] += list.length;
-                    if (dateStr === todayStr) dailyCounts[p.key] += list.length;
 
                     list.forEach((item, idx) => {
                         let card = document.createElement("div");
@@ -368,17 +524,16 @@
 
                         let tagHtml = item.isOcr ? `<span class="ocr-tag">📷 캡처</span>` : '';
                         let contentVal = item.content !== undefined ? item.content : ((item.title || '') + (item.note ? '\n' + item.note : ''));
-                        
-                        // 기존 데이터에 혹시 남아있을 수 있는 'P' 자동 제거 정제
                         let cleanedName = (item.name || '').replace(/P$/, '');
+                        const labelText = (p.key === "기타업무") ? "작성자 :" : "담당자 :";
 
                         card.innerHTML = `
                             <button class="delete-btn" onclick="removeTask('${p.key}', '${dateStr}', ${idx})">×</button>
                             ${tagHtml}
                             <textarea class="editable-textarea" placeholder="내용 작성..." oninput="autoResizeTextarea(this)" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
                             <div class="assignee-input-group">
-                                <span class="assignee-label">담당자 :</span>
-                                <input type="text" class="assignee-input" list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
+                                <span class="assignee-label">${labelText}</span>
+                                <input type="text" class="assignee-input" list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" placeholder="담당자 다중선택..." oninput="handleMultiAssigneeInput(this, '${p.key}', '${dateStr}', ${idx})" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
                                 <datalist id="team-list-${p.key}-${dateStr}-${idx}">
                                     ${teamMembers.map(m => `<option value="${m}">`).join('')}
                                 </datalist>
@@ -506,8 +661,10 @@
             }
         }
 
-        initTodayBadge();
-        updateWeekDates(currentDate);
+        window.onload = () => {
+            initTodayBadge();
+            updateWeekDates(currentDate);
+        };
     </script>
 </body>
 </html>
