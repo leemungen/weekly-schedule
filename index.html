@@ -271,7 +271,7 @@
         <div class="metric-card acm"><div class="metric-title">ACM 검수</div><div class="metric-value-group"><div class="metric-weekly" id="count-acm-weekly">주간 0건</div><div class="metric-daily" id="count-acm-daily">오늘 0건</div></div></div>
         <div class="metric-card pack"><div class="metric-title">Packing</div><div class="metric-value-group"><div class="metric-weekly" id="count-pack-weekly">주간 0건</div><div class="metric-daily" id="count-pack-daily">오늘 0건</div></div></div>
         <div class="metric-card out"><div class="metric-title">Factory Out</div><div class="metric-value-group"><div class="metric-weekly" id="count-out-weekly">주간 0건</div><div class="metric-daily" id="count-out-daily">오늘 0건</div></div></div>
-        <div class="metric-card leave-field"><div class="metric-title">연차 및 외근</div><div class="metric-value-group"><div class="metric-weekly" id="count-leave-field-weekly">주간 0건</div><div class="metric-daily" id="count-leave-field-daily">오늘 0건</div></div></div>
+        <div class="metric-card leave-field"><div class="metric-title">연차, 외근, 휴일근무</div><div class="metric-value-group"><div class="metric-weekly" id="count-leave-field-weekly">주간 0건</div><div class="metric-daily" id="count-leave-field-daily">오늘 0건</div></div></div>
         <div class="metric-card dr-meeting"><div class="metric-title">DR 및 미팅</div><div class="metric-value-group"><div class="metric-weekly" id="count-dr-meeting-weekly">주간 0건</div><div class="metric-daily" id="count-dr-meeting-daily">오늘 0건</div></div></div>
         <div class="metric-card etc"><div class="metric-title">기타업무</div><div class="metric-value-group"><div class="metric-weekly" id="count-etc-weekly">주간 0건</div><div class="metric-daily" id="count-etc-daily">오늘 0건</div></div></div>
     </div>
@@ -290,7 +290,7 @@
                                 <option value="ACM 검수">ACM 검수</option>
                                 <option value="Packing Date">Packing Date</option>
                                 <option value="Factory Out Date">Factory Out Date</option>
-                                <option value="연차 및 외근">연차 및 외근</option>
+                                <option value="연차 및 외근">연차, 외근, 휴일근무</option>
                                 <option value="DR 및 미팅">DR 및 미팅</option>
                                 <option value="기타업무">기타업무</option>
                             </select>
@@ -333,11 +333,18 @@ function requestEditPermission() {
     if (password === EDIT_PASSWORD) {
         editMode = true;
         document.body.classList.add("edit-enabled");
-        renderBoard();
         return true;
     }
     if (password !== null) alert("❌ 비밀번호가 올바르지 않습니다.");
     return false;
+}
+
+function checkEditAccess(e) {
+    if (!editMode) {
+        if (!requestEditPermission()) {
+            e.target.blur();
+        }
+    }
 }
 
 const teamMembers = [
@@ -453,7 +460,7 @@ const teamMembers = [
                 else if (/acm/i.test(trimmed)) targetProc = "ACM 검수";
                 else if (/pack|패킹|포장/i.test(trimmed)) targetProc = "Packing Date";
                 else if (/out|출하/i.test(trimmed)) targetProc = "Factory Out Date";
-                else if (/연차|외근/i.test(trimmed)) targetProc = "연차 및 외근";
+                else if (/연차|외근|휴일근무/i.test(trimmed)) targetProc = "연차 및 외근";
                 else if (/dr|미팅|회의/i.test(trimmed)) targetProc = "DR 및 미팅";
 
                 if (!boardData[targetProc][targetDate]) boardData[targetProc][targetDate] = [];
@@ -507,7 +514,7 @@ const teamMembers = [
                 { key: "ACM 검수", name: "ACM 검수", badge: "badge-acm", idPrefix: "count-acm", singleColumn: false },
                 { key: "Packing Date", name: "Packing Date", badge: "badge-pack", idPrefix: "count-pack", singleColumn: false },
                 { key: "Factory Out Date", name: "Factory Out Date", badge: "badge-out", idPrefix: "count-out", singleColumn: false },
-                { key: "연차 및 외근", name: "🏖️ 연차 및 외근", badge: "badge-leave-field", idPrefix: "count-leave-field", singleColumn: false },
+                { key: "연차 및 외근", name: "🏖️ 연차, 외근, 휴일근무", badge: "badge-leave-field", idPrefix: "count-leave-field", singleColumn: false },
                 { key: "DR 및 미팅", name: "💬 DR 및 미팅", badge: "badge-dr-meeting", idPrefix: "count-dr-meeting", singleColumn: true },
                 { key: "기타업무", name: "📌 기타업무", badge: "badge-etc", idPrefix: "count-etc", singleColumn: true }
             ];
@@ -573,18 +580,22 @@ const teamMembers = [
                         let contentVal = item.content !== undefined ? item.content : ((item.title || '') + (item.note ? '\n' + item.note : ''));
                         let cleanedName = (item.name || '').replace(/P$/, '');
                         const labelText = (p.key === "기타업무") ? "작성자 :" : "담당자 :";
-
-                        card.innerHTML = `
-                            <button class="delete-btn" onclick="removeTask('${p.key}', '${dateStr}', ${idx})">×</button>
-                            ${tagHtml}
-                            <textarea class="editable-textarea" ${editMode ? "" : "readonly"} placeholder="내용 작성..." oninput="autoResizeTextarea(this)" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
+                        const showAssignee = p.key !== "연차 및 외근";
+                        const assigneeHtml = showAssignee ? `
                             <div class="assignee-input-group">
                                 <span class="assignee-label">${labelText}</span>
-                                <input type="text" class="assignee-input" ${editMode ? "" : "readonly"} list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
+                                <input type="text" class="assignee-input" onfocus="checkEditAccess(event)" list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
                                 <datalist id="team-list-${p.key}-${dateStr}-${idx}">
                                     ${teamMembers.map(m => `<option value="${m}">`).join('')}
                                 </datalist>
                             </div>
+                        ` : '';
+
+                        card.innerHTML = `
+                            <button class="delete-btn" onclick="removeTask('${p.key}', '${dateStr}', ${idx})">×</button>
+                            ${tagHtml}
+                            <textarea class="editable-textarea" onfocus="checkEditAccess(event)" placeholder="내용 작성..." oninput="autoResizeTextarea(this)" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'content', this.value)">${contentVal}</textarea>
+                            ${assigneeHtml}
                         `;
                         cellContainer.appendChild(card);
                         
