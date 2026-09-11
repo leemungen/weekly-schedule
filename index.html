@@ -136,6 +136,28 @@
         .metric-daily { font-size: 12px; font-weight: 600; color: #2563eb; margin-top: 1px; }
 
         .board-container { background: var(--card-bg); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: auto; max-height: calc(100vh - 260px); border: 1px solid var(--border-color); }
+
+        .pw-modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
+            align-items: center; justify-content: center; z-index: 1000;
+        }
+        .pw-modal-overlay.show { display: flex; }
+        .pw-modal-box {
+            background: var(--card-bg); border-radius: 12px; padding: 24px;
+            width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .pw-modal-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; }
+        .pw-modal-input {
+            width: 100%; padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px;
+            font-size: 14px; outline: none; margin-bottom: 8px;
+        }
+        .pw-modal-input:focus { border-color: var(--primary); }
+        .pw-modal-error { font-size: 12px; color: #ef4444; min-height: 16px; margin-bottom: 8px; }
+        .pw-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+        .pw-modal-btn { padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #94a3b8; background: #fff; color: #334155; }
+        .pw-modal-btn.confirm { background: var(--primary); color: white; border-color: var(--primary); }
+        .pw-modal-btn.confirm:hover { background: var(--primary-dark); }
+        .pw-modal-btn:hover { background: #f1f5f9; }
         
         table { width: 100%; border-collapse: collapse; min-width: 100%; }
         th, td { border: 1.5px solid #94a3b8; padding: 8px; vertical-align: top; }
@@ -234,6 +256,17 @@
     </style>
 </head>
 <body>
+    <div class="pw-modal-overlay" id="pwModalOverlay">
+        <div class="pw-modal-box">
+            <div class="pw-modal-title">🔒 일정 수정/작성 비밀번호를 입력하세요.</div>
+            <input type="password" class="pw-modal-input" id="pwModalInput" autocomplete="off">
+            <div class="pw-modal-error" id="pwModalError"></div>
+            <div class="pw-modal-actions">
+                <button class="pw-modal-btn" onclick="pwModalCancel()">취소</button>
+                <button class="pw-modal-btn confirm" onclick="pwModalConfirm()">확인</button>
+            </div>
+        </div>
+    </div>
     <div class="header-container">
         <div class="title-area">
             <h1>📋 품질팀 스케줄 관리<span id="ocrStatus"></span></h1>
@@ -326,23 +359,62 @@
 
         const EDIT_PASSWORD = "3697";
 let editMode = false;
+let pwModalResolver = null;
 
-function requestEditPermission() {
+function openPasswordModal() {
+    const overlay = document.getElementById("pwModalOverlay");
+    const input = document.getElementById("pwModalInput");
+    const errorEl = document.getElementById("pwModalError");
+    errorEl.innerText = "";
+    input.value = "";
+    overlay.classList.add("show");
+    setTimeout(() => input.focus(), 0);
+
+    return new Promise((resolve) => {
+        pwModalResolver = resolve;
+    });
+}
+
+function closePasswordModal() {
+    document.getElementById("pwModalOverlay").classList.remove("show");
+}
+
+function pwModalConfirm() {
+    const input = document.getElementById("pwModalInput");
+    const value = input.value;
+    closePasswordModal();
+    if (pwModalResolver) { pwModalResolver(value); pwModalResolver = null; }
+}
+
+function pwModalCancel() {
+    closePasswordModal();
+    if (pwModalResolver) { pwModalResolver(null); pwModalResolver = null; }
+}
+
+document.addEventListener("keydown", (e) => {
+    const overlay = document.getElementById("pwModalOverlay");
+    if (!overlay || !overlay.classList.contains("show")) return;
+    if (e.key === "Enter") pwModalConfirm();
+    if (e.key === "Escape") pwModalCancel();
+});
+
+async function requestEditPermission() {
     if (editMode) return true;
-    const password = prompt("🔒 일정 수정/작성 비밀번호를 입력하세요.");
+    const password = await openPasswordModal();
     if (password === EDIT_PASSWORD) {
         editMode = true;
         document.body.classList.add("edit-enabled");
         return true;
     }
-    if (password !== null) alert("❌ 비밀번호가 올바르지 않습니다.");
+    if (password !== null && password !== "") alert("❌ 비밀번호가 올바르지 않습니다.");
     return false;
 }
 
-function checkEditAccess(e) {
+async function checkEditAccess(e) {
     if (!editMode) {
-        if (!requestEditPermission()) {
-            e.target.blur();
+        const target = e.target;
+        if (!(await requestEditPermission())) {
+            target.blur();
         }
     }
 }
@@ -377,8 +449,8 @@ const teamMembers = [
         });
 
         function autoSave() { scheduleRef.set(boardData); }
-        function manualSave() {
-    if (!requestEditPermission()) return;
+        async function manualSave() {
+    if (!(await requestEditPermission())) return;
     autoSave();
     alert("🌐 데이터베이스에 정상 저장이 완료되었습니다!");
 }
@@ -654,7 +726,11 @@ const teamMembers = [
         let draggedItemInfo = null;
 
         function handleDragStart(e, procKey, dateStr, idx) {
-            if (!requestEditPermission()) { e.preventDefault(); return; }
+            if (!editMode) {
+                e.preventDefault();
+                requestEditPermission(); // 잠금 해제 모달을 띄우되, 이번 드래그는 취소
+                return;
+            }
             draggedItemInfo = { procKey, dateStr, idx };
             e.target.classList.add("dragging");
             e.dataTransfer.setData("text/plain", JSON.stringify(draggedItemInfo));
@@ -700,24 +776,24 @@ const teamMembers = [
             autoSave();
         }
 
-        function addTask(procKey, dateStr) {
-            if (!requestEditPermission()) return;
+        async function addTask(procKey, dateStr) {
+            if (!(await requestEditPermission())) return;
             if (!boardData[procKey]) boardData[procKey] = {};
             if (!boardData[procKey][dateStr]) boardData[procKey][dateStr] = [];
             boardData[procKey][dateStr].push({ content: "", name: "", isOcr: false });
             autoSave();
         }
 
-        function removeTask(procKey, dateStr, idx) {
-            if (!requestEditPermission()) return;
+        async function removeTask(procKey, dateStr, idx) {
+            if (!(await requestEditPermission())) return;
             if (boardData[procKey] && boardData[procKey][dateStr]) {
                 boardData[procKey][dateStr].splice(idx, 1);
                 autoSave();
             }
         }
 
-        function updateTask(procKey, dateStr, idx, field, val) {
-            if (!requestEditPermission()) { renderBoard(); return; }
+        async function updateTask(procKey, dateStr, idx, field, val) {
+            if (!(await requestEditPermission())) { renderBoard(); return; }
             if (boardData[procKey] && boardData[procKey][dateStr] && boardData[procKey][dateStr][idx]) {
                 boardData[procKey][dateStr][idx][field] = val;
                 autoSave();
