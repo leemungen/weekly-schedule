@@ -220,6 +220,7 @@
         }
         
         .assignee-input-group { display: flex; align-items: center; gap: 2px; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; width: 100%; }
+        .assignee-input-group + .assignee-input-group { margin-top: 2px; }
         .assignee-label { font-size: 11px; font-weight: 700; color: #475569; white-space: nowrap; flex-shrink: 0; }
         .assignee-input { width: 100%; border: none; background: transparent; font-size: 11px; font-weight: 600; outline: none; color: #1e293b; }
         .delete-btn { position: absolute; top: 2px; right: 4px; background: none; border: none; color: #ef4444; font-size: 15px; cursor: pointer; z-index: 10; }
@@ -694,6 +695,48 @@ const teamMembers = [
             "윤대석", "이현지", "임창섭", "품질팀 전체", "미배정"
         ];
 
+        // 공정별 담당자 입력란 커스텀 설정. 여기에 없는 공정은 기존처럼 "담당자" 1칸만 표시됨.
+        const ROLE_CONFIG = {
+            "Packing Date": ["백업 담당자", "사촬 담당자", "서류 담당자"]
+        };
+
+        // 데스크톱/모바일 카드에서 공통으로 쓰는 담당자 입력 영역 생성 함수
+        function buildAssigneeHtml(p, item, dateStr, idx, listPrefix) {
+            if (p.key === "연차 및 외근") return '';
+
+            const optionsHtml = teamMembers.map(m => `<option value="${m}">`).join('');
+            const roles = ROLE_CONFIG[p.key];
+
+            if (!roles) {
+                const labelText = (p.key === "기타업무") ? "작성자 :" : "담당자 :";
+                const cleanedName = (item.name || '').replace(/P$/, '');
+                const listId = `${listPrefix}-${p.key}-${dateStr}-${idx}`;
+                return `
+                    <div class="assignee-input-group">
+                        <span class="assignee-label">${labelText}</span>
+                        <input type="text" class="assignee-input" onfocus="checkEditAccess(event)" list="${listId}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
+                        <datalist id="${listId}">${optionsHtml}</datalist>
+                    </div>
+                `;
+            }
+
+            // 역할별 담당자 (예: Packing Date -> 백업/사촬/서류 담당자)
+            return roles.map((roleLabel, roleIdx) => {
+                // 기존에 저장돼 있던 단일 "담당자" 값은 첫 번째 항목으로 자동 이관 (하위 호환)
+                const existingRoleVal = (item.roles && item.roles[roleIdx] !== undefined)
+                    ? item.roles[roleIdx]
+                    : (roleIdx === 0 ? (item.name || '').replace(/P$/, '') : '');
+                const listId = `${listPrefix}-${p.key}-${dateStr}-${idx}-${roleIdx}`;
+                return `
+                    <div class="assignee-input-group">
+                        <span class="assignee-label">${roleLabel} :</span>
+                        <input type="text" class="assignee-input" onfocus="checkEditAccess(event)" list="${listId}" value="${existingRoleVal}" onchange="updateRoleTask('${p.key}', '${dateStr}', ${idx}, ${roleIdx}, this.value)">
+                        <datalist id="${listId}">${optionsHtml}</datalist>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function getFormattedDate(dateObj) {
             const yyyy = dateObj.getFullYear();
             const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -886,23 +929,7 @@ const teamMembers = [
                         let contentVal = item.content !== undefined
                             ? item.content
                             : ((item.title || '') + (item.note ? '\n' + item.note : ''));
-                        let cleanedName = (item.name || '').replace(/P$/, '');
-                        const labelText = (p.key === "기타업무") ? "작성자 :" : "담당자 :";
-                        const showAssignee = p.key !== "연차 및 외근";
-
-                        const assigneeHtml = showAssignee ? `
-                            <div class="assignee-input-group">
-                                <span class="assignee-label">${labelText}</span>
-                                <input type="text" class="assignee-input"
-                                    onfocus="checkEditAccess(event)"
-                                    list="mobile-team-list-${p.key}-${dateStr}-${idx}"
-                                    value="${cleanedName}"
-                                    onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
-                                <datalist id="mobile-team-list-${p.key}-${dateStr}-${idx}">
-                                    ${teamMembers.map(m => `<option value="${m}">`).join('')}
-                                </datalist>
-                            </div>
-                        ` : '';
+                        const assigneeHtml = buildAssigneeHtml(p, item, dateStr, idx, 'mobile-team-list');
 
                         card.innerHTML = `
                             <button class="delete-btn" onclick="removeTask('${p.key}', '${dateStr}', ${idx})">×</button>
@@ -1048,18 +1075,7 @@ const teamMembers = [
 
                         let tagHtml = item.isOcr ? `<span class="ocr-tag">📷 캡처</span>` : '';
                         let contentVal = item.content !== undefined ? item.content : ((item.title || '') + (item.note ? '\n' + item.note : ''));
-                        let cleanedName = (item.name || '').replace(/P$/, '');
-                        const labelText = (p.key === "기타업무") ? "작성자 :" : "담당자 :";
-                        const showAssignee = p.key !== "연차 및 외근";
-                        const assigneeHtml = showAssignee ? `
-                            <div class="assignee-input-group">
-                                <span class="assignee-label">${labelText}</span>
-                                <input type="text" class="assignee-input" onfocus="checkEditAccess(event)" list="team-list-${p.key}-${dateStr}-${idx}" value="${cleanedName}" onchange="updateTask('${p.key}', '${dateStr}', ${idx}, 'name', this.value)">
-                                <datalist id="team-list-${p.key}-${dateStr}-${idx}">
-                                    ${teamMembers.map(m => `<option value="${m}">`).join('')}
-                                </datalist>
-                            </div>
-                        ` : '';
+                        const assigneeHtml = buildAssigneeHtml(p, item, dateStr, idx, 'team-list');
 
                         card.innerHTML = `
                             <button class="delete-btn" onclick="removeTask('${p.key}', '${dateStr}', ${idx})">×</button>
@@ -1107,7 +1123,9 @@ const teamMembers = [
 
             cards.forEach(card => {
                 const textVal = card.querySelector("textarea") ? card.querySelector("textarea").value.toLowerCase() : "";
-                const nameVal = card.querySelector(".assignee-input") ? card.querySelector(".assignee-input").value.toLowerCase() : "";
+                const nameVal = Array.from(card.querySelectorAll(".assignee-input"))
+                    .map(el => el.value.toLowerCase())
+                    .join(" ");
 
                 if (query === "") {
                     card.classList.remove("hidden", "highlight");
@@ -1194,6 +1212,17 @@ const teamMembers = [
             if (!(await requestEditPermission())) { renderBoard(); return; }
             if (boardData[procKey] && boardData[procKey][dateStr] && boardData[procKey][dateStr][idx]) {
                 boardData[procKey][dateStr][idx][field] = val;
+                autoSave();
+            }
+        }
+
+        // ROLE_CONFIG로 여러 개의 담당자 항목을 쓰는 공정(예: Packing Date)의 값 저장
+        async function updateRoleTask(procKey, dateStr, idx, roleIdx, val) {
+            if (!(await requestEditPermission())) { renderBoard(); return; }
+            const item = boardData[procKey] && boardData[procKey][dateStr] && boardData[procKey][dateStr][idx];
+            if (item) {
+                if (!item.roles) item.roles = [];
+                item.roles[roleIdx] = val;
                 autoSave();
             }
         }
