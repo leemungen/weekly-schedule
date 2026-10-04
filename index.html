@@ -563,7 +563,7 @@
             border-radius: 12px 12px 0 0; position: sticky; top: 0; z-index: 5;
         }
         .issue-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; min-width: 0; }
-        .issue-panel-header > .nav-btn { flex-shrink: 0; }
+        .issue-panel-header > .nav-btn, .issue-header-right .nav-btn { flex-shrink: 0; }
         .issue-breadcrumb { font-size: 16px; font-weight: 700; color: #1e293b; }
         .issue-breadcrumb .crumb { cursor: pointer; color: var(--primary-dark); }
         .issue-breadcrumb .crumb:hover { text-decoration: underline; }
@@ -623,6 +623,23 @@
         .issue-week-bar .search-input { width: 260px; }
         .issue-result-info { font-size: 13px; font-weight: 700; color: #475569; margin-top: 14px; }
         .issue-entry.highlight { border-color: #f59e0b; background-color: #fef3c7; }
+        .issue-header-right { display: flex; gap: 6px; flex-shrink: 0; }
+        .issue-export-btn { background: #ffffff; border: 1px solid #16a34a; color: #15803d; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .issue-export-btn:hover { background: #f0fdf4; }
+        .export-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); align-items: center; justify-content: center; z-index: 950; padding: 16px; }
+        .export-modal-overlay.show { display: flex; }
+        .export-modal-box { background: var(--card-bg); border-radius: 12px; padding: 22px; width: 380px; max-width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .export-modal-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+        .export-section-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin: 12px 0 6px; }
+        .export-scope { font-size: 14px; font-weight: 700; color: #1e293b; background: #f1f5f9; border-radius: 6px; padding: 8px 10px; }
+        .export-scope .desc { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
+        .export-period-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: #e2e8f0; padding: 3px; border-radius: 8px; }
+        .export-period-group .view-mode-btn { padding: 7px 4px; }
+        .export-custom { display: none; align-items: center; gap: 6px; margin-top: 8px; }
+        .export-custom.show { display: flex; }
+        .export-custom .issue-date-input { flex: 1; min-width: 0; }
+        .export-status { font-size: 12px; color: var(--primary-dark); font-weight: 600; min-height: 16px; margin-top: 10px; }
+        .export-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
         .issue-status-tag { display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
         .issue-status-tag.active { background: var(--process-qc); color: #1e40af; border: 1px solid #bfdbfe; }
         .issue-status-tag.shipped { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
@@ -665,6 +682,8 @@
             .issue-week-nav .nav-btn { flex: 1; }
             .issue-week-label { width: 100%; text-align: center; margin: 0 0 4px; }
             .issue-week-bar .search-input { width: 100%; }
+            .issue-export-btn { padding: 8px 10px; font-size: 13px; }
+            .export-custom .issue-date-input { font-size: 16px; }
             .issue-overlay { padding: 8px; }
             .issue-panel-header { padding: 12px; align-items: flex-start; }
             .issue-panel-header .nav-btn { flex: 0 0 auto; padding: 8px 12px; }
@@ -705,9 +724,38 @@
                     <div class="issue-breadcrumb" id="issueBreadcrumb"></div>
                     <span class="issue-demo-tag" id="issueDemoTag">샘플 모드 · 저장 안 됨</span>
                 </div>
-                <button class="nav-btn" onclick="closeIssueBoard()">✕ 닫기</button>
+                <div class="issue-header-right">
+                    <button class="issue-export-btn" onclick="openExportModal()">📥 엑셀</button>
+                    <button class="nav-btn" onclick="closeIssueBoard()">✕ 닫기</button>
+                </div>
             </div>
             <div class="issue-panel-body" id="issueBody"></div>
+        </div>
+    </div>
+
+    <!-- [추가] 엑셀 내보내기 창 -->
+    <div class="export-modal-overlay" id="exportModal">
+        <div class="export-modal-box">
+            <div class="export-modal-title">📥 이슈사항 엑셀 내보내기</div>
+            <div class="export-section-label">범위</div>
+            <div class="export-scope" id="exportScope"></div>
+            <div class="export-section-label">기간</div>
+            <div class="export-period-group">
+                <button class="view-mode-btn active" data-period="week" onclick="setExportPeriod('week')">이번 주</button>
+                <button class="view-mode-btn" data-period="month" onclick="setExportPeriod('month')">이번 달</button>
+                <button class="view-mode-btn" data-period="all" onclick="setExportPeriod('all')">전체</button>
+                <button class="view-mode-btn" data-period="custom" onclick="setExportPeriod('custom')">직접 지정</button>
+            </div>
+            <div class="export-custom" id="exportCustom">
+                <input type="date" class="issue-date-input" id="exportFrom">
+                <span>~</span>
+                <input type="date" class="issue-date-input" id="exportTo">
+            </div>
+            <div class="export-status" id="exportStatus"></div>
+            <div class="export-actions">
+                <button class="pw-modal-btn" onclick="closeExportModal()">취소</button>
+                <button class="save-btn" id="exportRunBtn" onclick="runExport()">📥 내보내기</button>
+            </div>
         </div>
     </div>
 
@@ -1425,7 +1473,7 @@ const teamMembers = [
                issue_board/team/{담당자}/{YYYY-MM-DD}      = [ {content, ts} ]
                issue_board/equip/{장비ID}                  = { factory, name, type, owner, shipped(출하일, 비어있으면 진행 중), logs: { {YYYY-MM-DD}: [ {content, ts} ] } }
            ========================================================= */
-        const ISSUE_DEMO_MODE = true;   // true: 샘플 데이터로 미리보기(저장 안 됨) / false: Firebase에 실제 저장
+        const ISSUE_DEMO_MODE = false;  // 운영: Firebase에 실제 저장 (true로 바꾸면 샘플 데이터 미리보기, 저장 안 됨)
 
         const ISSUE_TEAMS = [
             { key: "QA",   cls: "team-qa",   members: ["양승현", "김나현"] },
@@ -1475,11 +1523,14 @@ const teamMembers = [
         }
         function saveTarget(target) {
             if (ISSUE_DEMO_MODE) { renderIssueBoard(); return; }
-            if (target.kind === "team") {
-                database.ref("issue_board/team/" + target.id).set(issueData.team[target.id] || null);
-            } else {
-                database.ref("issue_board/equip/" + target.id).set((issueData.equip && issueData.equip[target.id]) || null);
-            }
+            const path = target.kind === "team" ? "issue_board/team/" + target.id : "issue_board/equip/" + target.id;
+            const value = target.kind === "team"
+                ? (issueData.team[target.id] || null)
+                : ((issueData.equip && issueData.equip[target.id]) || null);
+            database.ref(path).set(value).catch(err => {
+                console.error("이슈 저장 실패", err);
+                alert("❌ 이슈사항 저장에 실패했습니다.\n인터넷 연결 또는 Firebase 데이터베이스 권한(규칙)을 확인하세요.");
+            });
         }
         function equipsOf(factory, status) {
             return Object.entries(issueData.equip || {})
@@ -1533,7 +1584,10 @@ const teamMembers = [
             issueRef.on("value", (snapshot) => {
                 const v = snapshot.val() || {};
                 issueData = { team: v.team || {}, equip: v.equip || {} };
-                if (document.getElementById("issueOverlay").classList.contains("show")) renderIssueBoard();
+                if (document.getElementById("issueOverlay").classList.contains("show")) renderIssueBoard(true);
+            }, (err) => {
+                console.error("이슈 불러오기 실패", err);
+                alert("❌ 이슈사항을 불러오지 못했습니다.\nFirebase 데이터베이스 권한(규칙)을 확인하세요.");
             });
         }
 
@@ -1594,11 +1648,33 @@ const teamMembers = [
                 }
             }
             document.getElementById("issueBreadcrumb").innerHTML = html;
-            document.getElementById("issueBackBtn").innerText = v.level === "root" ? "◀ 닫기" : "◀ 뒤로";
+            const backBtn = document.getElementById("issueBackBtn");
+            backBtn.innerText = "◀ 뒤로";
+            backBtn.style.display = v.level === "root" ? "none" : "";   // 첫 화면에서는 [닫기]만 표시
         }
 
         /* ---------- 화면 그리기 ---------- */
-        function renderIssueBoard() {
+        function renderIssueBoard(keepInputs) {
+            // 실시간 갱신 시 작성 중이던 입력값/커서 유지
+            const keepIds = ["issueTextInput", "issueDateInput", "equipNameInput", "equipTypeInput", "equipOwnerInput", "shipDateInput"];
+            const saved = {};
+            let focusedId = null, selStart = null, selEnd = null;
+            if (keepInputs) {
+                keepIds.forEach(id => { const el = document.getElementById(id); if (el) saved[id] = el.value; });
+                const ae = document.activeElement;
+                if (ae && keepIds.includes(ae.id)) { focusedId = ae.id; try { selStart = ae.selectionStart; selEnd = ae.selectionEnd; } catch (e) {} }
+            }
+            renderIssueBoardInner();
+            if (keepInputs) {
+                Object.entries(saved).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+                if (focusedId) {
+                    const el = document.getElementById(focusedId);
+                    if (el) { el.focus(); try { if (selStart !== null) el.setSelectionRange(selStart, selEnd); } catch (e) {} }
+                }
+            }
+        }
+
+        function renderIssueBoardInner() {
             renderIssueBreadcrumb();
             const body = document.getElementById("issueBody");
             const v = issueView;
@@ -1912,8 +1988,9 @@ const teamMembers = [
             list.push({ content: text, ts: Date.now() });
             logs[date] = list;
             if (kind === "team") { issueWeekStart = mondayOf(date); issueLogQuery = ""; }
+            document.getElementById("issueTextInput").value = "";
             saveTarget(target);
-            if (!ISSUE_DEMO_MODE) document.getElementById("issueTextInput").value = "";
+            renderIssueBoard(true);
         }
 
         function updateIssue(kind, id, date, idx, val) {
@@ -1948,7 +2025,10 @@ const teamMembers = [
             const id = "eq_" + Date.now();
             if (!issueData.equip) issueData.equip = {};
             issueData.equip[id] = { factory, name, type, owner, logs: {} };
+            ["equipNameInput", "equipTypeInput"].forEach(i => document.getElementById(i).value = "");
+            document.getElementById("equipOwnerInput").value = "";
             saveTarget({ kind: "equip", id });
+            renderIssueBoard(true);
         }
 
         function changeEquipOwner(id, owner) {
@@ -1988,8 +2068,220 @@ const teamMembers = [
         document.addEventListener("keydown", (e) => {
             const ov = document.getElementById("issueOverlay");
             const pw = document.getElementById("pwModalOverlay");
+            const ex = document.getElementById("exportModal");
+            if (e.key === "Escape" && ex.classList.contains("show")) { closeExportModal(); return; }
             if (e.key === "Escape" && ov.classList.contains("show") && !pw.classList.contains("show")) closeIssueBoard();
         });
+
+
+        /* =========================================================
+           [추가] 이슈사항 엑셀 내보내기 (ExcelJS, 버튼 누를 때만 불러옴)
+           - 범위: 이슈사항 첫 화면 등 → 전체 / 담당자 화면 → 그 담당자 / 장비 화면 → 그 장비
+           - 기간: 이번 주 / 이번 달 / 전체 / 직접 지정
+           - 시트: ① 팀별 이슈  ② 장비별 이슈  ③ 장비 목록
+           ========================================================= */
+        const EXCELJS_URLS = [
+            "https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js",
+            "https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"
+        ];
+        let exportPeriod = "week";
+        let exportScope = { kind: "all" };
+
+        function loadScriptOnce(urls) {
+            if (window.ExcelJS) return Promise.resolve();
+            return urls.reduce((p, url) => p.catch(() => new Promise((resolve, reject) => {
+                const sc = document.createElement("script");
+                sc.src = url; sc.onload = resolve; sc.onerror = () => { sc.remove(); reject(); };
+                document.head.appendChild(sc);
+            })), Promise.reject());
+        }
+
+        function currentExportScope() {
+            const v = issueView;
+            if (v.level === "member") {
+                return { kind: "member", id: v.b, label: `👤 ${v.b} (${v.a})`, desc: "이 담당자의 팀별 이슈만 내보냅니다." };
+            }
+            if (v.level === "equip" && issueData.equip && issueData.equip[v.b]) {
+                const e = issueData.equip[v.b];
+                return { kind: "equip", id: v.b, label: `🏭 ${e.name} (${e.factory})`, desc: "이 장비의 이슈와 장비 정보만 내보냅니다." };
+            }
+            return { kind: "all", label: "📋 전체", desc: "팀별 이슈 + 장비별 이슈 + 장비 목록 (보관함 포함)" };
+        }
+
+        function openExportModal() {
+            exportScope = currentExportScope();
+            document.getElementById("exportScope").innerHTML = `${exportScope.label}<span class="desc">${exportScope.desc}</span>`;
+            document.getElementById("exportFrom").value = mondayOf(todayStr);
+            document.getElementById("exportTo").value = todayStr;
+            document.getElementById("exportStatus").innerText = "";
+            setExportPeriod(exportPeriod);
+            document.getElementById("exportModal").classList.add("show");
+        }
+        function closeExportModal() { document.getElementById("exportModal").classList.remove("show"); }
+
+        function setExportPeriod(p) {
+            exportPeriod = p;
+            document.querySelectorAll(".export-period-group .view-mode-btn")
+                .forEach(b => b.classList.toggle("active", b.dataset.period === p));
+            document.getElementById("exportCustom").classList.toggle("show", p === "custom");
+        }
+
+        // 기간 → [시작, 끝] (YYYY-MM-DD, 비어 있으면 제한 없음)
+        function exportRange() {
+            if (exportPeriod === "week") { const m = mondayOf(todayStr); return [m, addDays(m, 6), "이번 주"]; }
+            if (exportPeriod === "month") {
+                const ym = todayStr.substring(0, 7);
+                const last = new Date(+ym.substring(0, 4), +ym.substring(5, 7), 0).getDate();
+                return [ym + "-01", ym + "-" + String(last).padStart(2, "0"), "이번 달"];
+            }
+            if (exportPeriod === "custom") {
+                let a = document.getElementById("exportFrom").value, b = document.getElementById("exportTo").value;
+                if (a && b && a > b) [a, b] = [b, a];
+                return [a, b, "직접 지정"];
+            }
+            return ["", "", "전체"];
+        }
+
+        function teamOf(member) {
+            const t = ISSUE_TEAMS.find(t => t.members.includes(member));
+            return t ? t.key : "";
+        }
+
+        // 내보낼 행 데이터 모으기
+        function collectExportRows(from, to) {
+            const inRange = d => (!from || d >= from) && (!to || d <= to);
+            const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+            const dow = d => dayNames[new Date(d + "T00:00:00").getDay()];
+            const teamRows = [], equipRows = [], equipList = [];
+
+            if (exportScope.kind === "all" || exportScope.kind === "member") {
+                const members = exportScope.kind === "member" ? [exportScope.id] : ISSUE_ALL_MEMBERS;
+                members.forEach(m => {
+                    const logs = (issueData.team && issueData.team[m]) || {};
+                    Object.keys(logs).filter(inRange).forEach(d => toList(logs[d]).forEach(it =>
+                        teamRows.push([d, dow(d), teamOf(m), m, it.content || ""])));
+                });
+                teamRows.sort((a, b) => b[0].localeCompare(a[0]) || ISSUE_ALL_MEMBERS.indexOf(a[3]) - ISSUE_ALL_MEMBERS.indexOf(b[3]));
+            }
+
+            if (exportScope.kind === "all" || exportScope.kind === "equip") {
+                const entries = Object.entries(issueData.equip || {})
+                    .filter(([id, e]) => e && (exportScope.kind === "all" || id === exportScope.id))
+                    .sort((a, b) => a[1].factory.localeCompare(b[1].factory) ||
+                        String(a[1].name).localeCompare(String(b[1].name), "ko", { numeric: true }));
+                entries.forEach(([id, e]) => {
+                    const status = e.shipped ? "출하" : "진행 중";
+                    let cnt = 0;
+                    const logs = e.logs || {};
+                    Object.keys(logs).filter(inRange).forEach(d => toList(logs[d]).forEach(it => {
+                        cnt++;
+                        equipRows.push({ shipped: !!e.shipped, row: [e.factory, e.name, e.type || "", e.owner || "미배정", status, d, it.content || ""] });
+                    }));
+                    equipList.push({ shipped: !!e.shipped, row: [e.factory, e.name, e.type || "", e.owner || "미배정", status, e.shipped || "", cnt, latestDate(logs)] });
+                });
+                equipRows.sort((a, b) => b.row[5].localeCompare(a.row[5]) || a.row[0].localeCompare(b.row[0]));
+            }
+            return { teamRows, equipRows, equipList };
+        }
+
+        function styleSheet(ws, title, info, headers, widths, rows, opts) {
+            const FONT = "맑은 고딕";
+            const border = { style: "thin", color: { argb: "FFCBD5E1" } };
+            const lastCol = String.fromCharCode(64 + headers.length);
+            ws.columns = widths.map(w => ({ width: w }));
+
+            ws.mergeCells(`A1:${lastCol}1`);
+            ws.getCell("A1").value = title;
+            ws.getCell("A1").font = { name: FONT, size: 14, bold: true, color: { argb: "FF1E293B" } };
+            ws.getRow(1).height = 26;
+            ws.mergeCells(`A2:${lastCol}2`);
+            ws.getCell("A2").value = info;
+            ws.getCell("A2").font = { name: FONT, size: 9, color: { argb: "FF64748B" } };
+
+            const hr = ws.getRow(4);
+            headers.forEach((h, i) => {
+                const c = hr.getCell(i + 1);
+                c.value = h;
+                c.font = { name: FONT, size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+                c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF2563EB" } };
+                c.alignment = { horizontal: "center", vertical: "middle" };
+                c.border = { top: border, bottom: border, left: border, right: border };
+            });
+            hr.height = 22;
+
+            if (!rows.length) {
+                ws.mergeCells(`A5:${lastCol}5`);
+                const c = ws.getCell("A5");
+                c.value = "해당 기간에 기록이 없습니다.";
+                c.font = { name: FONT, size: 10, color: { argb: "FF94A3B8" } };
+                c.alignment = { horizontal: "center" };
+            }
+            rows.forEach((r, idx) => {
+                const data = r.row || r;
+                const row = ws.getRow(5 + idx);
+                data.forEach((v, i) => {
+                    const c = row.getCell(i + 1);
+                    c.value = v;
+                    const wrap = opts.wrapCols.includes(i);
+                    c.alignment = { vertical: "top", horizontal: wrap ? "left" : "center", wrapText: wrap };
+                    c.font = { name: FONT, size: 10, color: { argb: r.shipped ? "FF64748B" : "FF0F172A" } };
+                    c.border = { top: border, bottom: border, left: border, right: border };
+                    const fill = r.shipped ? "FFF1F5F9" : (idx % 2 ? "FFF8FAFC" : null);
+                    if (fill) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: fill } };
+                });
+            });
+            ws.views = [{ state: "frozen", ySplit: 4 }];
+            ws.autoFilter = { from: { row: 4, column: 1 }, to: { row: 4 + Math.max(rows.length, 1), column: headers.length } };
+            ws.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 };
+            ws.headerFooter = { oddFooter: "&C&P / &N" };
+        }
+
+        async function runExport() {
+            const statusEl = document.getElementById("exportStatus");
+            const btn = document.getElementById("exportRunBtn");
+            const [from, to, periodName] = exportRange();
+            if (exportPeriod === "custom" && (!from || !to)) { statusEl.innerText = "시작일과 종료일을 선택하세요."; return; }
+
+            btn.disabled = true;
+            statusEl.innerText = "⏳ 엑셀 파일을 만드는 중...";
+            try {
+                await loadScriptOnce(EXCELJS_URLS);
+            } catch (e) {
+                statusEl.innerText = "❌ 엑셀 도구를 불러오지 못했습니다. 인터넷 연결을 확인하세요.";
+                btn.disabled = false; return;
+            }
+
+            const { teamRows, equipRows, equipList } = collectExportRows(from, to);
+            const periodText = from || to ? `${periodName} (${from} ~ ${to})` : "전체 기간";
+            const info = `기간: ${periodText}   ·   범위: ${exportScope.label.replace(/^[^ ]+ /, "")}   ·   내보낸 날짜: ${todayStr}`;
+
+            const wb = new ExcelJS.Workbook();
+            wb.creator = "품질팀 스케줄 관리";
+            if (exportScope.kind !== "equip") {
+                styleSheet(wb.addWorksheet("팀별 이슈"), "품질팀 이슈사항 – 팀별 이슈", info,
+                    ["날짜", "요일", "팀", "담당자", "내용"], [12, 6, 8, 10, 80], teamRows, { wrapCols: [4] });
+            }
+            if (exportScope.kind !== "member") {
+                styleSheet(wb.addWorksheet("장비별 이슈"), "품질팀 이슈사항 – 장비별 이슈", info,
+                    ["공장", "장비명", "TYPE", "담당자", "상태", "날짜", "내용"], [8, 12, 12, 10, 9, 12, 70], equipRows, { wrapCols: [6] });
+                styleSheet(wb.addWorksheet("장비 목록"), "품질팀 이슈사항 – 장비 목록", info + "   ·   이슈 건수는 선택한 기간 기준",
+                    ["공장", "장비명", "TYPE", "담당자", "상태", "출하일", "이슈 건수", "최근 기록일"], [8, 12, 12, 10, 9, 12, 10, 12], equipList, { wrapCols: [] });
+            }
+
+            const buf = await wb.xlsx.writeBuffer();
+            const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+            const scopeName = exportScope.kind === "all" ? "전체" : exportScope.label.replace(/^[^ ]+ /, "").replace(/[()\s]+/g, "_").replace(/_$/, "");
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `품질팀_이슈사항_${scopeName}_${todayStr}.xlsx`;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+
+            const total = teamRows.length + equipRows.length;
+            statusEl.innerText = `✅ 내보내기 완료 (이슈 ${total}건)`;
+            btn.disabled = false;
+            setTimeout(closeExportModal, 1200);
+        }
 
         window.onload = () => {
             initTodayBadge();
