@@ -522,6 +522,166 @@
                 display: none;
             }
         }
+
+        /* =========================================================
+           [추가] 이슈사항 배너 / 화면
+           ========================================================= */
+        .issue-strip {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            background: var(--card-bg); border-radius: 8px; padding: 7px 14px; margin-bottom: 16px;
+            border: 1px solid var(--border-color); border-left: 4px solid var(--process-out-border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s;
+        }
+        .issue-strip:hover { background: var(--process-out); }
+        .issue-strip-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .issue-strip-icon {
+            width: 26px; height: 26px; border-radius: 6px; background: var(--process-out);
+            border: 1px solid var(--process-out-border); display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+        .issue-strip-text { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; min-width: 0; }
+        .issue-strip-title { font-size: 15px; font-weight: 700; color: #1e293b; white-space: nowrap; }
+        .issue-strip-sub { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .issue-strip-go {
+            background: #ffffff; border: 1px solid #94a3b8; padding: 3px 12px; border-radius: 6px;
+            font-size: 13px; font-weight: 600; color: #334155; white-space: nowrap; flex-shrink: 0;
+        }
+        .issue-strip:hover .issue-strip-go { background: var(--process-out-border); border-color: var(--process-out-border); color: #fff; }
+
+        .issue-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
+            z-index: 900; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow: auto;
+        }
+        .issue-overlay.show { display: flex; }
+        .issue-panel {
+            background: var(--bg-color); border-radius: 12px; width: 100%; max-width: 960px;
+            border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .issue-panel-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            background: var(--card-bg); padding: 14px 20px; border-bottom: 1px solid var(--border-color);
+            border-radius: 12px 12px 0 0; position: sticky; top: 0; z-index: 5;
+        }
+        .issue-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; min-width: 0; }
+        .issue-panel-header > .nav-btn { flex-shrink: 0; }
+        .issue-breadcrumb { font-size: 16px; font-weight: 700; color: #1e293b; }
+        .issue-breadcrumb .crumb { cursor: pointer; color: var(--primary-dark); }
+        .issue-breadcrumb .crumb:hover { text-decoration: underline; }
+        .issue-breadcrumb .sep { color: var(--text-muted); margin: 0 6px; font-weight: 400; }
+        .issue-breadcrumb span { white-space: nowrap; }   /* 장비명·담당자명이 중간에서 끊기지 않게 */
+        .issue-demo-tag { font-size: 11px; font-weight: 700; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; }
+        .issue-panel-body { padding: 20px; }
+        .issue-guide { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 12px; }
+
+        .issue-banner-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .issue-banner-grid.members { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+        .issue-banner-card {
+            background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--primary);
+            border-radius: 10px; padding: 22px 16px; text-align: center; cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: all 0.2s;
+        }
+        .issue-banner-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .issue-banner-card .name { font-size: 18px; font-weight: 700; color: var(--text-main); }
+        .issue-banner-grid.members .issue-banner-card { padding: 16px 12px; }
+        .issue-banner-grid.members .issue-banner-card .name { font-size: 16px; }
+        .issue-banner-card .sub { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 6px; }
+        .issue-banner-card.team-qa { border-left-color: var(--process-qc-border); }
+        .issue-banner-card.team-prod { border-left-color: var(--process-pack-border); }
+        .issue-banner-card.team-dev { border-left-color: var(--process-acm-border); }
+        .issue-banner-card.cat-team { border-left-color: var(--primary); }
+        .issue-banner-card.cat-equip { border-left-color: var(--process-out-border); }
+        .issue-banner-card.fac-1 { border-left-color: var(--process-frame-border); }
+        .issue-banner-card.fac-2 { border-left-color: var(--process-dr-meeting-border); }
+        .issue-banner-card .owner { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; }
+        .issue-banner-card .owner.none { color: #b45309; background: #fef3c7; }
+        .issue-banner-grid.two { grid-template-columns: repeat(2, 1fr); }
+        .issue-equip-add {
+            margin-top: 14px; background: var(--card-bg); border: 1px dashed #94a3b8; border-radius: 10px;
+            padding: 12px 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+        }
+        .issue-text-input { padding: 6px 10px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 13px; outline: none; font-family: inherit; min-width: 140px; }
+        .issue-text-input:focus, .issue-select:focus { border-color: var(--primary); }
+        .issue-select { padding: 6px 10px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 13px; outline: none; background: #fff; font-weight: 600; color: #334155; font-family: inherit; }
+        .issue-equip-info {
+            background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--process-out-border);
+            border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+        }
+        .issue-equip-info .title { font-size: 17px; font-weight: 700; }
+        .issue-del-btn { background: #fff; border: 1px solid #fca5a5; color: #dc2626; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .issue-del-btn:hover { background: #fef2f2; }
+        .issue-equip-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+        .issue-equip-toolbar .search-input { width: 260px; }
+        .issue-month-title { font-size: 13px; font-weight: 700; color: #475569; margin: 14px 0 8px; }
+        .issue-month-title:first-child { margin-top: 0; }
+        .issue-week-bar {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+            margin-top: 18px; padding: 10px 12px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;
+        }
+        .issue-week-nav { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .issue-week-label { font-size: 14px; font-weight: 700; color: #1e293b; margin-right: 6px; }
+        .issue-week-label .range { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-left: 4px; }
+        .issue-week-bar .search-input { width: 260px; }
+        .issue-result-info { font-size: 13px; font-weight: 700; color: #475569; margin-top: 14px; }
+        .issue-entry.highlight { border-color: #f59e0b; background-color: #fef3c7; }
+        .issue-status-tag { display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+        .issue-status-tag.active { background: var(--process-qc); color: #1e40af; border: 1px solid #bfdbfe; }
+        .issue-status-tag.shipped { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .issue-banner-card.shipped { background: #f8fafc; border-left-color: #94a3b8; }
+        .issue-ship-btn { background: #fff; border: 1px solid var(--primary); color: var(--primary-dark); padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .issue-ship-btn:hover { background: #eff6ff; }
+
+        .issue-form {
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .issue-form-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .issue-form-label { font-size: 13px; font-weight: 700; color: #475569; }
+        .issue-date-input { padding: 6px 10px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 13px; outline: none; font-family: inherit; }
+        .issue-date-input:focus, .issue-textarea:focus { border-color: var(--primary); }
+        .issue-textarea {
+            width: 100%; min-height: 90px; border: 1px solid #94a3b8; border-radius: 6px; padding: 8px 10px;
+            font-size: 13px; line-height: 1.45; outline: none; resize: vertical; font-family: inherit;
+        }
+        .issue-form-actions { display: flex; justify-content: flex-end; }
+
+        .issue-day-group { margin-top: 18px; }
+        .issue-day-title { font-size: 14px; font-weight: 700; padding: 6px 2px; border-bottom: 1.5px solid #94a3b8; margin-bottom: 8px; }
+        .issue-day-title.today { color: #0284c7; border-bottom-color: #0284c7; }
+        .issue-day-title .day-sub { margin-left: 6px; }
+        .issue-entry { cursor: default; padding: 8px 28px 8px 8px; margin-bottom: 6px; }
+        .issue-entry .editable-textarea { font-size: 13px; line-height: 1.45; margin-bottom: 0; }
+        .issue-empty { color: #94a3b8; font-size: 13px; padding: 20px 4px; text-align: center; }
+
+        @media (max-width: 768px) {
+            .issue-strip { padding: 7px 10px; margin-bottom: 10px; }
+            .issue-strip-title { font-size: 14px; }
+            .issue-strip-text { gap: 2px 8px; }
+            .issue-strip-sub { font-size: 11px; }
+            .issue-strip-go { padding: 3px 8px; font-size: 12px; }
+            .issue-equip-info { flex-direction: column; align-items: stretch !important; }
+            .issue-equip-toolbar { flex-direction: column; align-items: stretch; }
+            .issue-equip-toolbar .search-input { width: 100%; }
+            .issue-week-bar { flex-direction: column; align-items: stretch; }
+            .issue-week-nav .nav-btn { flex: 1; }
+            .issue-week-label { width: 100%; text-align: center; margin: 0 0 4px; }
+            .issue-week-bar .search-input { width: 100%; }
+            .issue-overlay { padding: 8px; }
+            .issue-panel-header { padding: 12px; align-items: flex-start; }
+            .issue-panel-header .nav-btn { flex: 0 0 auto; padding: 8px 12px; }
+            .issue-breadcrumb { font-size: 13px; }
+            .issue-breadcrumb { font-size: 14px; }
+            .issue-panel-body { padding: 12px; }
+            .issue-banner-grid, .issue-banner-grid.two { grid-template-columns: 1fr; gap: 10px; }
+            .issue-banner-grid.members { grid-template-columns: repeat(2, 1fr); }
+            .issue-banner-card { padding: 16px 12px; }
+            /* 아이폰 입력 시 자동 확대 방지: 입력칸 글자 16px (기존 비밀번호 칸과 동일) */
+            .issue-textarea, .issue-entry .editable-textarea,
+            .issue-date-input, .issue-text-input, .issue-select,
+            .issue-week-bar .search-input, .issue-equip-toolbar .search-input { font-size: 16px; }
+            .issue-date-input, .issue-text-input, .issue-select { min-height: 40px; }
+            .issue-text-input { width: 100%; }
+            .issue-breadcrumb { line-height: 1.6; }
+        }
     </style>
 </head>
 <body>
@@ -536,6 +696,21 @@
             </div>
         </div>
     </div>
+    <!-- [추가] 이슈사항 화면 (팀 → 담당자 → 일별 작성) -->
+    <div class="issue-overlay" id="issueOverlay">
+        <div class="issue-panel">
+            <div class="issue-panel-header">
+                <div class="issue-header-left">
+                    <button class="nav-btn" id="issueBackBtn" onclick="issueGoBack()">◀ 뒤로</button>
+                    <div class="issue-breadcrumb" id="issueBreadcrumb"></div>
+                    <span class="issue-demo-tag" id="issueDemoTag">샘플 모드 · 저장 안 됨</span>
+                </div>
+                <button class="nav-btn" onclick="closeIssueBoard()">✕ 닫기</button>
+            </div>
+            <div class="issue-panel-body" id="issueBody"></div>
+        </div>
+    </div>
+
     <div class="header-container">
         <div class="title-area">
             <h1>📋 품질팀 스케줄 관리<span id="ocrStatus"></span></h1>
@@ -565,6 +740,18 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- [추가] 이슈사항 전용 띠 (통계 카드 위) -->
+    <div class="issue-strip" onclick="openIssueBoard()">
+        <div class="issue-strip-left">
+            <div class="issue-strip-icon">🚨</div>
+            <div class="issue-strip-text">
+                <span class="issue-strip-title">이슈사항</span>
+                <span class="issue-strip-sub">팀별 · 장비별(1·2공장) 이슈 기록 · 🔒 비밀번호 필요</span>
+            </div>
+        </div>
+        <span class="issue-strip-go">들어가기 ▶</span>
     </div>
 
     <div class="metrics-grid">
@@ -702,7 +889,8 @@ const teamMembers = [
 
         // 데스크톱/모바일 카드에서 공통으로 쓰는 담당자 입력 영역 생성 함수
         function buildAssigneeHtml(p, item, dateStr, idx, listPrefix) {
-            if (p.key === "연차 및 외근") return '';
+            // 담당자란을 표시하지 않는 공정
+            if (p.key === "연차 및 외근" || p.key === "Factory Out Date") return '';
 
             const optionsHtml = teamMembers.map(m => `<option value="${m}">`).join('');
             const roles = ROLE_CONFIG[p.key];
@@ -1226,6 +1414,582 @@ const teamMembers = [
                 autoSave();
             }
         }
+
+
+        /* =========================================================
+           [추가] 이슈사항
+           - 팀별 이슈 : 팀 → 담당자 → 날짜별 자유 작성
+           - 장비별 이슈: 공장(1·2공장) → 장비 → 담당자 지정 + 날짜별 자유 작성
+           - 열람/작성 모두 비밀번호 필요
+           - 데이터 위치 (기존 weekly_schedule과 분리)
+               issue_board/team/{담당자}/{YYYY-MM-DD}      = [ {content, ts} ]
+               issue_board/equip/{장비ID}                  = { factory, name, type, owner, shipped(출하일, 비어있으면 진행 중), logs: { {YYYY-MM-DD}: [ {content, ts} ] } }
+           ========================================================= */
+        const ISSUE_DEMO_MODE = true;   // true: 샘플 데이터로 미리보기(저장 안 됨) / false: Firebase에 실제 저장
+
+        const ISSUE_TEAMS = [
+            { key: "QA",   cls: "team-qa",   members: ["양승현", "김나현"] },
+            { key: "양산", cls: "team-prod", members: ["이문근", "이우진", "이현지", "임창섭", "김수원"] },
+            { key: "개발", cls: "team-dev",  members: ["권대협", "곽승범", "윤대석"] }
+        ];
+        const ISSUE_FACTORIES = [
+            { key: "1공장", cls: "fac-1" },
+            { key: "2공장", cls: "fac-2" }
+        ];
+        const ISSUE_ALL_MEMBERS = ISSUE_TEAMS.flatMap(t => t.members);
+
+        let issueData = { team: {}, equip: {} };
+        let issueUnlocked = false;
+        let issueRef = null;
+        // level: root | teams | members | member | factories | equipList | equip
+        let issueView = { level: "root" };
+        let issueEquipTab = "active";   // active: 진행 중 / archive: 보관함(출하 완료)
+        let issueEquipQuery = "";
+        let issueWeekStart = "";        // 담당자 화면에서 보고 있는 주의 월요일 (YYYY-MM-DD)
+        let issueLogQuery = "";         // 담당자 화면 검색어 (전체 기간)
+
+        function escapeHtml(s) {
+            return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        }
+        function toList(v) {
+            if (!v) return [];
+            return Array.isArray(v) ? v.filter(Boolean) : Object.values(v);
+        }
+        function shiftDate(days) {
+            const d = new Date(todayReal.getFullYear(), todayReal.getMonth(), todayReal.getDate() + days);
+            return getFormattedDate(d);
+        }
+
+        /* ---------- 기록 대상(담당자 또는 장비)별 공통 처리 ---------- */
+        // target = { kind: "team", id: 담당자명 } 또는 { kind: "equip", id: 장비ID }
+        function getLogs(target, create) {
+            if (target.kind === "team") {
+                if (!issueData.team) issueData.team = {};
+                if (!issueData.team[target.id] && create) issueData.team[target.id] = {};
+                return issueData.team[target.id] || {};
+            }
+            const eq = issueData.equip && issueData.equip[target.id];
+            if (!eq) return {};
+            if (!eq.logs && create) eq.logs = {};
+            return eq.logs || {};
+        }
+        function saveTarget(target) {
+            if (ISSUE_DEMO_MODE) { renderIssueBoard(); return; }
+            if (target.kind === "team") {
+                database.ref("issue_board/team/" + target.id).set(issueData.team[target.id] || null);
+            } else {
+                database.ref("issue_board/equip/" + target.id).set((issueData.equip && issueData.equip[target.id]) || null);
+            }
+        }
+        function equipsOf(factory, status) {
+            return Object.entries(issueData.equip || {})
+                .filter(([id, e]) => e && e.factory === factory)
+                .filter(([id, e]) => !status || (status === "active" ? !e.shipped : !!e.shipped))
+                .sort((a, b) => String(a[1].name).localeCompare(String(b[1].name), "ko", { numeric: true }));
+        }
+        function latestDate(logs) {
+            const ds = Object.keys(logs || {}).filter(d => toList(logs[d]).length > 0).sort();
+            return ds.length ? ds[ds.length - 1] : "";
+        }
+
+        /* ---------- 샘플 데이터 ---------- */
+        function loadIssueDemoData() {
+            issueData = {
+                team: {
+                    "이우진": { [shiftDate(-2)]: [{ content: "(샘플) 사이클 테스트 결과 정리 – 배큠 알람 2회, 원인 분석 중", ts: 1 }] },
+                    "임창섭": { [shiftDate(-1)]: [{ content: "(샘플) 전장 협력업체 하네스 커넥터 체결 불량 3EA, 업체 회신 대기", ts: 2 }] },
+                    "김수원": {
+                        [shiftDate(0)]:   [{ content: "(샘플) 구매품 브라켓 치수 부적합(±0.2 초과) 5EA – 업체 반품 진행", ts: 3 }],
+                        [shiftDate(-8)]:  [{ content: "(샘플) 3공장 프레임 도장 들뜸 – 재작업 요청", ts: 31 }],
+                        [shiftDate(-15)]: [{ content: "(샘플) 구매품 브라켓 업체 납기 지연 1주 – 대체 업체 검토", ts: 32 }],
+                        [shiftDate(-40)]: [{ content: "(샘플) 구매품 실린더 누설 2EA – 업체 반품", ts: 33 }] },
+                    "양승현": { [shiftDate(-3)]: [{ content: "(샘플) 출하 전 전체 검출 부적합 1건 – 라벨 누락, 현장 조치 완료", ts: 4 }] }
+                },
+                equip: {
+                    "eq_demo1": { factory: "1공장", name: "#07호기", type: "EFEM", owner: "이우진", logs: {
+                        [shiftDate(0)]:  [{ content: "(샘플) Z축 구동 시 떨림 발생 – 사이클 200회 중 3회, 설계팀 공유", ts: 5 }],
+                        [shiftDate(-3)]: [{ content: "(샘플) 엔드이펙터 패드 교체 후 배큠 정상 확인", ts: 6 }] } },
+                    "eq_demo2": { factory: "1공장", name: "#08호기", type: "EFEM", owner: "이문근", logs: {} },
+                    "eq_demo3": { factory: "2공장", name: "#10호기", type: "Sorter", owner: "임창섭", logs: {
+                        [shiftDate(-1)]: [{ content: "(샘플) 전장 판넬 배선 정리 미흡 – 재작업 요청", ts: 7 }] } },
+                    "eq_demo4": { factory: "2공장", name: "#11호기", type: "Sorter", owner: "", logs: {} },
+                    "eq_demo5": { factory: "1공장", name: "#01호기", type: "EFEM", owner: "이우진", shipped: shiftDate(-9), logs: {
+                        [shiftDate(-15)]: [{ content: "(샘플) 출하 전 전체 검출 – 커버 스크래치 1건 보수 후 출하", ts: 8 }] } },
+                    "eq_demo6": { factory: "1공장", name: "#02호기", type: "EFEM", owner: "이문근", shipped: shiftDate(-40), logs: {} },
+                    "eq_demo7": { factory: "2공장", name: "#05호기", type: "Sorter", owner: "임창섭", shipped: shiftDate(-4), logs: {} }
+                }
+            };
+        }
+
+        function connectIssueDatabase() {
+            if (ISSUE_DEMO_MODE) {
+                loadIssueDemoData();
+                document.getElementById("issueDemoTag").style.display = "";
+                return;
+            }
+            document.getElementById("issueDemoTag").style.display = "none";
+            if (issueRef) return;
+            issueRef = database.ref("issue_board");
+            issueRef.on("value", (snapshot) => {
+                const v = snapshot.val() || {};
+                issueData = { team: v.team || {}, equip: v.equip || {} };
+                if (document.getElementById("issueOverlay").classList.contains("show")) renderIssueBoard();
+            });
+        }
+
+        /* ---------- 열기 / 닫기 / 이동 ---------- */
+        async function openIssueBoard() {
+            if (!issueUnlocked) {
+                const titleEl = document.querySelector("#pwModalOverlay .pw-modal-title");
+                const prevTitle = titleEl.innerText;
+                titleEl.innerText = "🔒 이슈사항 열람 비밀번호를 입력하세요.";
+                const ok = await requestEditPermission();
+                titleEl.innerText = prevTitle;
+                if (!ok) return;
+                issueUnlocked = true;
+                connectIssueDatabase();
+            }
+            issueView = { level: "root" };
+            document.getElementById("issueOverlay").classList.add("show");
+            document.body.style.overflow = "hidden";
+            renderIssueBoard();
+        }
+
+        function closeIssueBoard() {
+            document.getElementById("issueOverlay").classList.remove("show");
+            document.body.style.overflow = "";
+        }
+
+        function issueGoTo(level, a, b) {
+            issueView = { level, a: a || null, b: b || null };
+            renderIssueBoard();
+            document.getElementById("issueOverlay").scrollTop = 0;
+        }
+
+        function issueGoBack() {
+            const v = issueView;
+            if (v.level === "member") issueGoTo("members", v.a);
+            else if (v.level === "members") issueGoTo("teams");
+            else if (v.level === "equip") issueGoTo("equipList", v.a);
+            else if (v.level === "equipList") issueGoTo("factories");
+            else if (v.level === "teams" || v.level === "factories") issueGoTo("root");
+            else closeIssueBoard();
+        }
+
+        function renderIssueBreadcrumb() {
+            const v = issueView;
+            const sep = `<span class="sep">›</span>`;
+            let html = `<span class="crumb" onclick="issueGoTo('root')">🚨 이슈사항</span>`;
+            if (["teams", "members", "member"].includes(v.level)) {
+                html += sep + `<span class="crumb" onclick="issueGoTo('teams')">팀별 이슈</span>`;
+                if (v.a) html += sep + `<span class="crumb" onclick="issueGoTo('members','${v.a}')">${v.a}</span>`;
+                if (v.b) html += sep + `<span>${v.b}</span>`;
+            }
+            if (["factories", "equipList", "equip"].includes(v.level)) {
+                html += sep + `<span class="crumb" onclick="issueGoTo('factories')">장비별 이슈</span>`;
+                if (v.a) html += sep + `<span class="crumb" onclick="issueGoTo('equipList','${v.a}')">${v.a}</span>`;
+                if (v.b) {
+                    const eq = issueData.equip && issueData.equip[v.b];
+                    html += sep + `<span>${escapeHtml(eq ? eq.name : "")}</span>`;
+                }
+            }
+            document.getElementById("issueBreadcrumb").innerHTML = html;
+            document.getElementById("issueBackBtn").innerText = v.level === "root" ? "◀ 닫기" : "◀ 뒤로";
+        }
+
+        /* ---------- 화면 그리기 ---------- */
+        function renderIssueBoard() {
+            renderIssueBreadcrumb();
+            const body = document.getElementById("issueBody");
+            const v = issueView;
+
+            if (v.level === "root") {
+                const eqCount = Object.values(issueData.equip || {}).filter(e => e && !e.shipped).length;
+                body.innerHTML = `
+                    <div class="issue-guide">이슈 구분을 선택하세요.</div>
+                    <div class="issue-banner-grid two">
+                        <div class="issue-banner-card cat-team" onclick="issueGoTo('teams')">
+                            <div class="name">👥 팀별 이슈</div>
+                            <div class="sub">QA · 양산 · 개발 담당자별 기록</div>
+                        </div>
+                        <div class="issue-banner-card cat-equip" onclick="issueGoTo('factories')">
+                            <div class="name">🏭 장비별 이슈</div>
+                            <div class="sub">1공장 · 2공장 진행 중 장비 ${eqCount}대</div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            if (v.level === "teams") {
+                body.innerHTML = `
+                    <div class="issue-guide">팀을 선택하세요.</div>
+                    <div class="issue-banner-grid">
+                        ${ISSUE_TEAMS.map(t => `
+                            <div class="issue-banner-card ${t.cls}" onclick="issueGoTo('members','${t.key}')">
+                                <div class="name">${t.key}</div>
+                                <div class="sub">담당자 ${t.members.length}명</div>
+                            </div>`).join("")}
+                    </div>`;
+                return;
+            }
+
+            if (v.level === "members") {
+                const team = ISSUE_TEAMS.find(t => t.key === v.a);
+                body.innerHTML = `
+                    <div class="issue-guide">${team.key} · 담당자를 선택하세요.</div>
+                    <div class="issue-banner-grid members">
+                        ${team.members.map(m => `
+                            <div class="issue-banner-card ${team.cls}" onclick="issueWeekStart=mondayOf(todayStr); issueLogQuery=''; issueGoTo('member','${team.key}','${m}')">
+                                <div class="name">${m}</div>
+                            </div>`).join("")}
+                    </div>`;
+                return;
+            }
+
+            if (v.level === "member") {
+                body.innerHTML = renderLogSection({ kind: "team", id: v.b });
+                afterLogRender(body);
+                return;
+            }
+
+            if (v.level === "factories") {
+                body.innerHTML = `
+                    <div class="issue-guide">공장을 선택하세요.</div>
+                    <div class="issue-banner-grid two">
+                        ${ISSUE_FACTORIES.map(f => `
+                            <div class="issue-banner-card ${f.cls}" onclick="issueEquipTab='active'; issueEquipQuery=''; issueGoTo('equipList','${f.key}')">
+                                <div class="name">${f.key}</div>
+                                <div class="sub">진행 중 ${equipsOf(f.key, "active").length}대 · 보관함 ${equipsOf(f.key, "archive").length}대</div>
+                            </div>`).join("")}
+                    </div>`;
+                return;
+            }
+
+            if (v.level === "equipList") {
+                const fac = ISSUE_FACTORIES.find(f => f.key === v.a);
+                const nActive = equipsOf(fac.key, "active").length;
+                const nArchive = equipsOf(fac.key, "archive").length;
+                body.innerHTML = `
+                    <div class="issue-equip-toolbar">
+                        <div class="view-mode-group">
+                            <button class="view-mode-btn ${issueEquipTab === "active" ? "active" : ""}" onclick="setEquipTab('active')">🔧 진행 중 (${nActive})</button>
+                            <button class="view-mode-btn ${issueEquipTab === "archive" ? "active" : ""}" onclick="setEquipTab('archive')">📦 보관함 (${nArchive})</button>
+                        </div>
+                        <input type="text" class="search-input" id="equipSearchInput" placeholder="🔍 장비명 / TYPE 검색 (보관함 포함)"
+                            value="${escapeHtml(issueEquipQuery)}" oninput="issueEquipQuery=this.value; renderEquipResults()">
+                    </div>
+                    <div id="equipResults"></div>
+                    ${issueEquipTab === "active" ? `
+                    <div class="issue-equip-add">
+                        <span class="issue-form-label">＋ 장비 추가</span>
+                        <input type="text" class="issue-text-input" id="equipNameInput" placeholder="장비명 (예: #12호기)">
+                        <input type="text" class="issue-text-input" id="equipTypeInput" placeholder="TYPE (예: EFEM)">
+                        <select class="issue-select" id="equipOwnerInput">${ownerOptions("")}</select>
+                        <button class="save-btn" onclick="addEquip('${fac.key}')">추가</button>
+                    </div>` : ""}`;
+                renderEquipResults();
+                return;
+            }
+
+            if (v.level === "equip") {
+                const eq = issueData.equip && issueData.equip[v.b];
+                if (!eq) { issueGoTo("equipList", v.a); return; }
+                body.innerHTML = `
+                    <div class="issue-equip-info">
+                        <div>
+                            <div class="title">${escapeHtml(eq.name)}</div>
+                            <div class="issue-guide" style="margin:2px 0 0;">${eq.factory} · TYPE : ${eq.type ? escapeHtml(eq.type) : "-"}</div>
+                            ${eq.shipped ? `<div class="issue-status-tag shipped">📦 출하 완료 ${eq.shipped} · 보관함</div>` : `<div class="issue-status-tag active">🔧 진행 중</div>`}
+                        </div>
+                        <div class="issue-form-row">
+                            <span class="issue-form-label">👤 담당자</span>
+                            <select class="issue-select" onchange="changeEquipOwner('${v.b}', this.value)">${ownerOptions(eq.owner)}</select>
+                            ${eq.shipped
+                                ? `<button class="issue-ship-btn" onclick="unshipEquip('${v.b}')">↩ 출하 취소</button>`
+                                : `<input type="date" class="issue-date-input" id="shipDateInput" value="${todayStr}" title="출하일">
+                                   <button class="issue-ship-btn" onclick="shipEquip('${v.b}')">📦 출하 완료</button>`}
+                            <button class="issue-del-btn" onclick="removeEquip('${v.b}')">장비 삭제</button>
+                        </div>
+                    </div>
+                    ${renderLogSection({ kind: "equip", id: v.b })}`;
+                afterLogRender(body);
+                return;
+            }
+        }
+
+        function setEquipTab(tab) {
+            issueEquipTab = tab;
+            renderIssueBoard();
+        }
+
+        function equipCardHtml(fac, id, e, showStatus) {
+            const last = latestDate(e.logs);
+            const status = e.shipped
+                ? `<div class="issue-status-tag shipped">📦 출하 ${e.shipped.substring(2).replace(/-/g, ".")}</div>`
+                : (showStatus ? `<div class="issue-status-tag active">🔧 진행 중</div>` : "");
+            return `
+                <div class="issue-banner-card ${fac.cls} ${e.shipped ? "shipped" : ""}" onclick="issueGoTo('equip','${fac.key}','${id}')">
+                    <div class="name">${escapeHtml(e.name)}</div>
+                    <div class="sub" style="margin-top:2px;">TYPE : ${e.type ? escapeHtml(e.type) : "-"}</div>
+                    <div class="owner ${e.owner ? "" : "none"}">담당 : ${e.owner ? escapeHtml(e.owner) : "미배정"}</div>
+                    <div class="sub">${last ? "최근 기록 " + last.substring(5).replace("-", "/") : "기록 없음"}</div>
+                    ${status}
+                </div>`;
+        }
+
+        // 장비 목록 영역만 다시 그림 (검색 입력 중 포커스 유지)
+        function renderEquipResults() {
+            const box = document.getElementById("equipResults");
+            if (!box) return;
+            const fac = ISSUE_FACTORIES.find(f => f.key === issueView.a);
+            const q = issueEquipQuery.trim().toLowerCase();
+
+            if (q) {
+                const hits = equipsOf(fac.key).filter(([id, e]) =>
+                    String(e.name || "").toLowerCase().includes(q) || String(e.type || "").toLowerCase().includes(q));
+                box.innerHTML = hits.length
+                    ? `<div class="issue-month-title">검색 결과 ${hits.length}건 (진행 중 + 보관함)</div>
+                       <div class="issue-banner-grid members">${hits.map(([id, e]) => equipCardHtml(fac, id, e, true)).join("")}</div>`
+                    : `<div class="issue-empty">'${escapeHtml(issueEquipQuery)}' 검색 결과가 없습니다.</div>`;
+                return;
+            }
+
+            if (issueEquipTab === "active") {
+                const list = equipsOf(fac.key, "active");
+                box.innerHTML = list.length
+                    ? `<div class="issue-banner-grid members">${list.map(([id, e]) => equipCardHtml(fac, id, e, false)).join("")}</div>`
+                    : `<div class="issue-empty">진행 중인 장비가 없습니다. 아래에서 장비를 추가하세요.</div>`;
+                return;
+            }
+
+            // 보관함: 출하 연·월별 묶음 (최근 순)
+            const list = equipsOf(fac.key, "archive").sort((a, b) => String(b[1].shipped).localeCompare(String(a[1].shipped)));
+            if (!list.length) { box.innerHTML = `<div class="issue-empty">출하 완료된 장비가 없습니다.</div>`; return; }
+            const groups = {};
+            list.forEach(([id, e]) => { const k = e.shipped.substring(0, 7); (groups[k] = groups[k] || []).push([id, e]); });
+            box.innerHTML = Object.keys(groups).sort().reverse().map(k => `
+                <div class="issue-month-title">${k.substring(0, 4)}년 ${parseInt(k.substring(5), 10)}월 출하 · ${groups[k].length}대</div>
+                <div class="issue-banner-grid members">${groups[k].map(([id, e]) => equipCardHtml(fac, id, e, false)).join("")}</div>`).join("");
+        }
+
+        function ownerOptions(selected) {
+            let html = `<option value="" ${!selected ? "selected" : ""}>담당자 미배정</option>`;
+            ISSUE_TEAMS.forEach(t => {
+                html += `<optgroup label="${t.key}">` +
+                    t.members.map(m => `<option value="${m}" ${m === selected ? "selected" : ""}>${m}</option>`).join("") +
+                    `</optgroup>`;
+            });
+            return html;
+        }
+
+        /* ---------- 주간 계산 (사이트와 같은 방식: 월~일, 월요일 기준 주차) ---------- */
+        function mondayOf(dateStr) {
+            const d = new Date(dateStr + "T00:00:00");
+            const day = d.getDay();
+            d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+            return getFormattedDate(d);
+        }
+        function addDays(dateStr, n) {
+            const d = new Date(dateStr + "T00:00:00");
+            d.setDate(d.getDate() + n);
+            return getFormattedDate(d);
+        }
+        function weekLabel(monday) {
+            const d = new Date(monday + "T00:00:00");
+            const sunday = addDays(monday, 6);
+            return `${d.getFullYear()}년 ${String(d.getMonth() + 1).padStart(2, "0")}월 ${Math.ceil(d.getDate() / 7)}주차` +
+                `<span class="range">(${monday.substring(5).replace("-", "/")} ~ ${sunday.substring(5).replace("-", "/")})</span>`;
+        }
+        function changeIssueWeek(n) {
+            issueWeekStart = n === 0 ? mondayOf(todayStr) : addDays(issueWeekStart, n * 7);
+            renderLogResults();
+        }
+
+        // 날짜별 목록 HTML. dates: 표시할 날짜, filterFn: 항목 필터(검색용)
+        function logListHtml(target, dates, filterFn, emptyText) {
+            const logs = getLogs(target, false);
+            const dayNames = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+            const t = `'${target.kind}','${target.id}'`;
+            let count = 0;
+            const html = dates.map(d => {
+                const dObj = new Date(d + "T00:00:00");
+                const isToday = d === todayStr;
+                const items = toList(logs[d]).map((it, idx) => ({ it, idx }))
+                    .filter(x => !filterFn || filterFn(x.it))
+                    .map(({ it, idx }) => { count++; return `
+                        <div class="item-card issue-entry ${filterFn ? "highlight" : ""}">
+                            <button class="delete-btn" onclick="removeIssue(${t},'${d}',${idx})">×</button>
+                            <textarea class="editable-textarea" oninput="autoResizeTextarea(this)"
+                                onchange="updateIssue(${t},'${d}',${idx},this.value)">${escapeHtml(it.content)}</textarea>
+                        </div>`; }).join("");
+                if (!items) return "";
+                const yearPrefix = filterFn ? d.substring(2, 4) + "/" : "";
+                return `
+                    <div class="issue-day-group">
+                        <div class="issue-day-title ${isToday ? "today" : ""}">${yearPrefix}${d.substring(5).replace("-", "/")}
+                            <span class="day-sub">${dayNames[dObj.getDay()]}${isToday ? " (오늘)" : ""}</span></div>
+                        ${items}
+                    </div>`;
+            }).join("");
+            return { html: count ? html : `<div class="issue-empty">${emptyText}</div>`, count };
+        }
+
+        // 담당자 화면: 주간 목록 또는 검색 결과 영역만 다시 그림 (검색 입력 중 포커스 유지)
+        function renderLogResults() {
+            const box = document.getElementById("logResults");
+            if (!box) return;
+            const target = { kind: "team", id: issueView.b };
+            const logs = getLogs(target, false);
+            const q = issueLogQuery.trim().toLowerCase();
+
+            const label = document.getElementById("issueWeekLabel");
+            const nav = document.getElementById("issueWeekNav");
+            if (label) label.innerHTML = weekLabel(issueWeekStart);
+            if (nav) nav.style.opacity = q ? "0.4" : "1";
+
+            if (q) {
+                const dates = Object.keys(logs).sort().reverse();
+                const r = logListHtml(target, dates, it => String(it.content || "").toLowerCase().includes(q),
+                    `'${escapeHtml(issueLogQuery)}' 검색 결과가 없습니다.`);
+                box.innerHTML = `<div class="issue-result-info">🔍 검색 결과 ${r.count}건 (전체 기간)</div>` + r.html;
+            } else {
+                const weekDates = [0, 1, 2, 3, 4, 5, 6].map(i => addDays(issueWeekStart, i)).reverse();
+                const r = logListHtml(target, weekDates, null, "이 주에 등록된 이슈사항이 없습니다.");
+                box.innerHTML = `<div class="issue-result-info">이 주 기록 ${r.count}건</div>` + r.html;
+            }
+            setTimeout(() => box.querySelectorAll(".issue-entry textarea").forEach(autoResizeTextarea), 0);
+        }
+
+        // 작성 폼 + 목록 (담당자: 주간/검색, 장비: 전체 날짜)
+        function renderLogSection(target) {
+            const t = `'${target.kind}','${target.id}'`;
+            const form = `
+                <div class="issue-form">
+                    <div class="issue-form-row">
+                        <span class="issue-form-label">📅 날짜</span>
+                        <input type="date" class="issue-date-input" id="issueDateInput" value="${todayStr}">
+                    </div>
+                    <textarea class="issue-textarea" id="issueTextInput" placeholder="이슈 내용을 자유롭게 작성하세요..."></textarea>
+                    <div class="issue-form-actions">
+                        <button class="save-btn" onclick="addIssue(${t})">＋ 등록</button>
+                    </div>
+                </div>`;
+
+            if (target.kind === "team") {
+                if (!issueWeekStart) issueWeekStart = mondayOf(todayStr);
+                setTimeout(renderLogResults, 0);
+                return form + `
+                    <div class="issue-week-bar">
+                        <div class="issue-week-nav" id="issueWeekNav">
+                            <span class="issue-week-label" id="issueWeekLabel">${weekLabel(issueWeekStart)}</span>
+                            <button class="nav-btn" onclick="changeIssueWeek(-1)">◀ 이전주</button>
+                            <button class="nav-btn today" onclick="changeIssueWeek(0)">이번주</button>
+                            <button class="nav-btn" onclick="changeIssueWeek(1)">다음주 ▶</button>
+                        </div>
+                        <input type="text" class="search-input" id="issueLogSearch" placeholder="🔍 기록 검색 (전체 기간)"
+                            value="${escapeHtml(issueLogQuery)}" oninput="issueLogQuery=this.value; renderLogResults()">
+                    </div>
+                    <div id="logResults"></div>`;
+            }
+
+            const logs = getLogs(target, false);
+            const dates = Object.keys(logs).sort().reverse();
+            return form + logListHtml(target, dates, null, "등록된 이슈사항이 없습니다.").html;
+        }
+        function afterLogRender(body) {
+            setTimeout(() => body.querySelectorAll(".issue-entry textarea").forEach(autoResizeTextarea), 0);
+        }
+
+        /* ---------- 이슈 기록 등록 / 수정 / 삭제 ---------- */
+        function addIssue(kind, id) {
+            const target = { kind, id };
+            const date = document.getElementById("issueDateInput").value;
+            const text = document.getElementById("issueTextInput").value.trim();
+            if (!date) { alert("날짜를 선택하세요."); return; }
+            if (!text) { alert("내용을 입력하세요."); return; }
+            const logs = getLogs(target, true);
+            const list = toList(logs[date]);
+            list.push({ content: text, ts: Date.now() });
+            logs[date] = list;
+            if (kind === "team") { issueWeekStart = mondayOf(date); issueLogQuery = ""; }
+            saveTarget(target);
+            if (!ISSUE_DEMO_MODE) document.getElementById("issueTextInput").value = "";
+        }
+
+        function updateIssue(kind, id, date, idx, val) {
+            const target = { kind, id };
+            const logs = getLogs(target, false);
+            const list = toList(logs[date]);
+            if (!list[idx]) return;
+            list[idx].content = val;
+            logs[date] = list;
+            saveTarget(target);
+        }
+
+        function removeIssue(kind, id, date, idx) {
+            if (!confirm("이 이슈를 삭제할까요?")) return;
+            const target = { kind, id };
+            const logs = getLogs(target, false);
+            const list = toList(logs[date]);
+            list.splice(idx, 1);
+            if (list.length) logs[date] = list; else delete logs[date];
+            saveTarget(target);
+        }
+
+        /* ---------- 장비 추가 / 담당자 변경 / 삭제 ---------- */
+        function addEquip(factory) {
+            const name = document.getElementById("equipNameInput").value.trim();
+            const type = document.getElementById("equipTypeInput").value.trim();
+            const owner = document.getElementById("equipOwnerInput").value;
+            if (!name) { alert("장비명을 입력하세요."); return; }
+            if (!type) { alert("TYPE을 입력하세요."); return; }
+            const dup = equipsOf(factory).some(([id, e]) => e.name === name);
+            if (dup) { alert("같은 이름의 장비가 이미 있습니다."); return; }
+            const id = "eq_" + Date.now();
+            if (!issueData.equip) issueData.equip = {};
+            issueData.equip[id] = { factory, name, type, owner, logs: {} };
+            saveTarget({ kind: "equip", id });
+        }
+
+        function changeEquipOwner(id, owner) {
+            if (!issueData.equip[id]) return;
+            issueData.equip[id].owner = owner;
+            saveTarget({ kind: "equip", id });
+        }
+
+        function shipEquip(id) {
+            const eq = issueData.equip[id];
+            if (!eq) return;
+            const date = document.getElementById("shipDateInput").value || todayStr;
+            if (!confirm(`${eq.name}을(를) ${date} 출하 완료로 처리할까요?\n진행 중 목록에서 빠지고 보관함으로 이동합니다.`)) return;
+            eq.shipped = date;
+            saveTarget({ kind: "equip", id });
+        }
+
+        function unshipEquip(id) {
+            const eq = issueData.equip[id];
+            if (!eq) return;
+            if (!confirm(`${eq.name}의 출하 처리를 취소하고 진행 중 목록으로 되돌릴까요?`)) return;
+            eq.shipped = null;
+            delete eq.shipped;
+            saveTarget({ kind: "equip", id });
+        }
+
+        function removeEquip(id) {
+            const eq = issueData.equip[id];
+            if (!eq) return;
+            if (!confirm(`${eq.name} 장비와 모든 이슈 기록을 삭제할까요?\n(잘못 등록한 장비만 삭제하세요. 출하된 장비는 [출하 완료]로 보관함에 보내면 이력이 남습니다.)`)) return;
+            const factory = eq.factory;
+            delete issueData.equip[id];
+            saveTarget({ kind: "equip", id });
+            issueGoTo("equipList", factory);
+        }
+
+        document.addEventListener("keydown", (e) => {
+            const ov = document.getElementById("issueOverlay");
+            const pw = document.getElementById("pwModalOverlay");
+            if (e.key === "Escape" && ov.classList.contains("show") && !pw.classList.contains("show")) closeIssueBoard();
+        });
 
         window.onload = () => {
             initTodayBadge();
