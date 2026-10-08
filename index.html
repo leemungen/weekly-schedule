@@ -598,6 +598,23 @@
         .issue-week-bar .search-input { width: 260px; }
         .issue-result-info { font-size: 13px; font-weight: 700; color: #475569; margin-top: 14px; }
         .issue-entry.highlight { border-color: #f59e0b; background-color: #fef3c7; }
+        /* 전체 보기 */
+        .issue-banner-grid.four { grid-template-columns: repeat(4, 1fr); }
+        .issue-banner-card.team-all { border-left-color: var(--process-out-border); background: #fffafa; }
+        .issue-all-filter { margin-top: 0; }
+        .issue-all-entry {
+            background: #ffffff; border: 1px solid #94a3b8; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px;
+            display: flex; gap: 10px; align-items: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        .issue-all-entry.highlight { border-color: #f59e0b; background-color: #fef3c7; }
+        .issue-all-who { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; width: 64px; }
+        .issue-team-tag { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid; white-space: nowrap; }
+        .issue-team-tag.team-qa { background: var(--process-qc); color: #1e40af; border-color: var(--process-qc-border); }
+        .issue-team-tag.team-prod { background: var(--process-pack); color: #9a3412; border-color: var(--process-pack-border); }
+        .issue-team-tag.team-dev { background: var(--process-acm); color: #5b21b6; border-color: var(--process-acm-border); }
+        .issue-name-link { font-size: 13px; font-weight: 700; color: var(--primary-dark); cursor: pointer; white-space: nowrap; }
+        .issue-name-link:hover { text-decoration: underline; }
+        .issue-all-content { font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; flex: 1; min-width: 0; color: var(--text-main); }
         .issue-header-right { display: flex; gap: 6px; flex-shrink: 0; }
         .issue-export-btn { background: #ffffff; border: 1px solid #16a34a; color: #15803d; padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .issue-export-btn:hover { background: #f0fdf4; }
@@ -656,7 +673,11 @@
             .issue-breadcrumb { font-size: 13px; }
             .issue-breadcrumb { font-size: 14px; }
             .issue-panel-body { padding: 12px; }
-            .issue-banner-grid { grid-template-columns: 1fr; gap: 10px; }
+            .issue-banner-grid, .issue-banner-grid.four { grid-template-columns: 1fr; gap: 10px; }
+            .issue-all-filter { width: 100%; display: flex; }
+            .issue-all-filter .view-mode-btn { flex: 1; }
+            .issue-all-who { width: 56px; }
+            .issue-all-content { font-size: 14px; }
             .issue-banner-grid.members { grid-template-columns: repeat(2, 1fr); }
             .issue-banner-card { padding: 16px 12px; }
             /* 아이폰 입력 시 자동 확대 방지: 입력칸 글자 16px (기존 비밀번호 칸과 동일) */
@@ -1447,8 +1468,10 @@ const teamMembers = [
         let issueData = { team: {} };
         let issueUnlocked = false;
         let issueRef = null;
-        // level: teams | members | member
+        // level: teams | all(전체 보기) | members | member
         let issueView = { level: "teams" };
+        let issueAllTeam = "";          // 전체 보기 팀 필터 ("" = 전체)
+        let issueAllQuery = "";         // 전체 보기 검색어 (전체 기간)
         let issueWeekStart = "";        // 담당자 화면에서 보고 있는 주의 월요일 (YYYY-MM-DD)
         let issueLogQuery = "";         // 담당자 화면 검색어 (전체 기간)
 
@@ -1546,7 +1569,7 @@ const teamMembers = [
         function issueGoBack() {
             const v = issueView;
             if (v.level === "member") issueGoTo("members", v.a);
-            else if (v.level === "members") issueGoTo("teams");
+            else if (v.level === "members" || v.level === "all") issueGoTo("teams");
             else closeIssueBoard();
         }
 
@@ -1554,6 +1577,7 @@ const teamMembers = [
             const v = issueView;
             const sep = `<span class="sep">›</span>`;
             let html = `<span class="crumb" onclick="issueGoTo('teams')">🚨 이슈사항</span>`;
+            if (v.level === "all") html += sep + `<span>전체 보기</span>`;
             if (v.a) html += sep + `<span class="crumb" onclick="issueGoTo('members','${v.a}')">${v.a}</span>`;
             if (v.b) html += sep + `<span>${v.b}</span>`;
             document.getElementById("issueBreadcrumb").innerHTML = html;
@@ -1565,7 +1589,7 @@ const teamMembers = [
         /* ---------- 화면 그리기 ---------- */
         function renderIssueBoard(keepInputs) {
             // 실시간 갱신 시 작성 중이던 입력값/커서 유지
-            const keepIds = ["issueTextInput", "issueDateInput"];
+            const keepIds = ["issueTextInput", "issueDateInput", "issueLogSearch", "issueAllSearch"];
             const saved = {};
             let focusedId = null, selStart = null, selEnd = null;
             if (keepInputs) {
@@ -1590,8 +1614,12 @@ const teamMembers = [
 
             if (v.level === "teams") {
                 body.innerHTML = `
-                    <div class="issue-guide">팀을 선택하세요.</div>
-                    <div class="issue-banner-grid">
+                    <div class="issue-guide">팀을 선택하거나, [전체 보기]로 모든 담당자의 기록을 한 번에 확인하세요.</div>
+                    <div class="issue-banner-grid four">
+                        <div class="issue-banner-card team-all" onclick="issueAllTeam=''; issueAllQuery=''; issueWeekStart=mondayOf(todayStr); issueGoTo('all')">
+                            <div class="name">📋 전체 보기</div>
+                            <div class="sub">모든 담당자 · 날짜별 모아보기</div>
+                        </div>
                         ${ISSUE_TEAMS.map(t => `
                             <div class="issue-banner-card ${t.cls}" onclick="issueGoTo('members','${t.key}')">
                                 <div class="name">${t.key}</div>
@@ -1611,6 +1639,29 @@ const teamMembers = [
                                 <div class="name">${m}</div>
                             </div>`).join("")}
                     </div>`;
+                return;
+            }
+
+            if (v.level === "all") {
+                body.innerHTML = `
+                    <div class="issue-week-bar" style="margin-top:0;">
+                        <div class="view-mode-group issue-all-filter">
+                            <button class="view-mode-btn ${issueAllTeam === "" ? "active" : ""}" onclick="setAllTeam('')">전체</button>
+                            ${ISSUE_TEAMS.map(t => `<button class="view-mode-btn ${issueAllTeam === t.key ? "active" : ""}" onclick="setAllTeam('${t.key}')">${t.key}</button>`).join("")}
+                        </div>
+                    </div>
+                    <div class="issue-week-bar">
+                        <div class="issue-week-nav" id="issueWeekNav">
+                            <span class="issue-week-label" id="issueWeekLabel">${weekLabel(issueWeekStart)}</span>
+                            <button class="nav-btn" onclick="changeIssueWeek(-1)">◀ 이전주</button>
+                            <button class="nav-btn today" onclick="changeIssueWeek(0)">이번주</button>
+                            <button class="nav-btn" onclick="changeIssueWeek(1)">다음주 ▶</button>
+                        </div>
+                        <input type="text" class="search-input" id="issueAllSearch" placeholder="🔍 전체 기록 검색 (전체 기간)"
+                            value="${escapeHtml(issueAllQuery)}" oninput="issueAllQuery=this.value; renderAllResults()">
+                    </div>
+                    <div id="allResults"></div>`;
+                renderAllResults();
                 return;
             }
 
@@ -1642,7 +1693,7 @@ const teamMembers = [
         }
         function changeIssueWeek(n) {
             issueWeekStart = n === 0 ? mondayOf(todayStr) : addDays(issueWeekStart, n * 7);
-            renderLogResults();
+            if (issueView.level === "all") renderAllResults(); else renderLogResults();
         }
 
         // 날짜별 목록 HTML. dates: 표시할 날짜, filterFn: 항목 필터(검색용)
@@ -1672,6 +1723,71 @@ const teamMembers = [
                     </div>`;
             }).join("");
             return { html: count ? html : `<div class="issue-empty">${emptyText}</div>`, count };
+        }
+
+        /* ---------- 전체 보기: 모든 담당자 기록을 날짜별로 모아 보기 (읽기 전용, 이름 누르면 담당자 화면) ---------- */
+        function setAllTeam(team) {
+            issueAllTeam = team;
+            renderIssueBoard(true);
+        }
+
+        function openMemberFromAll(member, date) {
+            issueWeekStart = mondayOf(date);
+            issueLogQuery = "";
+            issueGoTo("member", teamOf(member), member);
+        }
+
+        function renderAllResults() {
+            const box = document.getElementById("allResults");
+            if (!box) return;
+            const q = issueAllQuery.trim().toLowerCase();
+            const label = document.getElementById("issueWeekLabel");
+            const nav = document.getElementById("issueWeekNav");
+            if (label) label.innerHTML = weekLabel(issueWeekStart);
+            if (nav) nav.style.opacity = q ? "0.4" : "1";
+
+            const teams = ISSUE_TEAMS.filter(t => !issueAllTeam || t.key === issueAllTeam);
+            const weekFrom = issueWeekStart, weekTo = addDays(issueWeekStart, 6);
+            const byDate = {};
+            let count = 0;
+            teams.forEach(t => t.members.forEach(m => {
+                const logs = (issueData.team && issueData.team[m]) || {};
+                Object.keys(logs).forEach(d => {
+                    if (!q && (d < weekFrom || d > weekTo)) return;
+                    toList(logs[d]).forEach(it => {
+                        if (q && !(String(it.content || "").toLowerCase().includes(q) || m.toLowerCase().includes(q))) return;
+                        (byDate[d] = byDate[d] || []).push({ team: t, member: m, content: it.content || "" });
+                        count++;
+                    });
+                });
+            }));
+
+            const dayNames = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+            const scopeText = issueAllTeam ? issueAllTeam : "전체";
+            const info = q ? `🔍 검색 결과 ${count}건 (${scopeText} · 전체 기간)` : `이 주 기록 ${count}건 (${scopeText})`;
+            if (!count) {
+                box.innerHTML = `<div class="issue-result-info">${info}</div><div class="issue-empty">${q ? `'${escapeHtml(issueAllQuery)}' 검색 결과가 없습니다.` : "이 주에 등록된 이슈사항이 없습니다."}</div>`;
+                return;
+            }
+            box.innerHTML = `<div class="issue-result-info">${info}</div>` + Object.keys(byDate).sort().reverse().map(d => {
+                const dObj = new Date(d + "T00:00:00");
+                const isToday = d === todayStr;
+                const items = byDate[d].map(x => `
+                    <div class="issue-all-entry ${q ? "highlight" : ""}">
+                        <div class="issue-all-who">
+                            <span class="issue-team-tag ${x.team.cls}">${x.team.key}</span>
+                            <span class="issue-name-link" onclick="openMemberFromAll('${x.member}','${d}')" title="${x.member} 화면으로 이동">${x.member}</span>
+                        </div>
+                        <div class="issue-all-content">${escapeHtml(x.content)}</div>
+                    </div>`).join("");
+                const yearPrefix = q ? d.substring(2, 4) + "/" : "";
+                return `
+                    <div class="issue-day-group">
+                        <div class="issue-day-title ${isToday ? "today" : ""}">${yearPrefix}${d.substring(5).replace("-", "/")}
+                            <span class="day-sub">${dayNames[dObj.getDay()]}${isToday ? " (오늘)" : ""}</span></div>
+                        ${items}
+                    </div>`;
+            }).join("");
         }
 
         // 담당자 화면: 주간 목록 또는 검색 결과 영역만 다시 그림 (검색 입력 중 포커스 유지)
@@ -1810,6 +1926,9 @@ const teamMembers = [
             if (v.level === "member") {
                 return { kind: "member", id: v.b, label: `👤 ${v.b} (${v.a})`, desc: "이 담당자의 팀별 이슈만 내보냅니다." };
             }
+            if (v.level === "all" && issueAllTeam) {
+                return { kind: "team", id: issueAllTeam, label: `👥 ${issueAllTeam} 팀`, desc: `${issueAllTeam} 팀 담당자의 이슈만 내보냅니다.` };
+            }
             return { kind: "all", label: "📋 전체", desc: "QA · 양산 · 개발 전체 담당자의 이슈" };
         }
 
@@ -1860,7 +1979,9 @@ const teamMembers = [
             const teamRows = [];
 
             {
-                const members = exportScope.kind === "member" ? [exportScope.id] : ISSUE_ALL_MEMBERS;
+                const members = exportScope.kind === "member" ? [exportScope.id]
+                    : exportScope.kind === "team" ? ISSUE_TEAMS.find(t => t.key === exportScope.id).members
+                    : ISSUE_ALL_MEMBERS;
                 members.forEach(m => {
                     const logs = (issueData.team && issueData.team[m]) || {};
                     Object.keys(logs).filter(inRange).forEach(d => toList(logs[d]).forEach(it =>
