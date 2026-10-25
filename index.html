@@ -524,6 +524,29 @@
         }
 
         /* =========================================================
+           [추가] 공장 탭 (성남 / 동탄)
+           ========================================================= */
+        /* 공장 탭 + 보기 탭을 제목 아래 한 줄에 작게 배치 */
+        /* 탭 줄 전체 길이를 제목(📋 품질팀 스케줄 관리) 길이에 맞춤 */
+        .title-area { width: fit-content; }
+        #ocrStatus:empty { margin-left: 0; }   /* 비어 있을 때 제목 길이에 여백이 더해지지 않게 */
+        .title-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+        .title-controls .view-mode-group { display: flex; align-self: auto; width: 100%; }
+        .title-controls .view-mode-btn { flex: 1; padding: 4px 2px; font-size: 12px; white-space: nowrap; }
+        .factory-tabs { display: flex; width: 100%; background: #e2e8f0; padding: 2px; border-radius: 8px; gap: 2px; }
+        .factory-tab {
+            flex: 1; border: none; background: transparent; padding: 4px 2px; font-size: 12px; font-weight: 700;
+            border-radius: 6px; cursor: pointer; color: #64748b; transition: all 0.2s; white-space: nowrap;
+        }
+        .factory-tab:hover { color: #334155; }
+        .factory-tab.active { background: var(--primary); color: #ffffff; box-shadow: 0 1px 2px rgba(37,99,235,0.35); }
+        .title-controls .divider { display: none; }
+        .factory-badge {
+            display: inline-block; margin-left: 6px; font-size: 12px; font-weight: 700; vertical-align: middle;
+            color: var(--primary-dark); background: #eff6ff; border: 1px solid #bfdbfe; padding: 1px 7px; border-radius: 6px;
+        }
+
+        /* =========================================================
            [추가] 이슈사항 배너 / 화면
            ========================================================= */
         .issue-strip {
@@ -656,6 +679,11 @@
         .issue-empty { color: #94a3b8; font-size: 13px; padding: 20px 4px; text-align: center; }
 
         @media (max-width: 768px) {
+            .title-controls { gap: 6px; }
+            .factory-tab { min-height: 34px; padding: 6px 2px; }
+            .title-controls .view-mode-btn { min-height: 34px; padding: 6px 1px; font-size: 11px; }
+            .factory-tab { font-size: 11px; padding: 6px 1px; }
+            .title-controls { gap: 4px; }
             .issue-strip { padding: 7px 10px; margin-bottom: 10px; }
             .issue-strip-title { font-size: 14px; }
             .issue-strip-text { gap: 2px 8px; }
@@ -721,7 +749,7 @@
     <!-- [추가] 엑셀 내보내기 창 -->
     <div class="export-modal-overlay" id="exportModal">
         <div class="export-modal-box">
-            <div class="export-modal-title">📥 이슈사항 엑셀 내보내기</div>
+            <div class="export-modal-title">📥 이슈사항 엑셀 내보내기 <span class="factory-badge" id="exportFactory"></span></div>
             <div class="export-section-label">범위</div>
             <div class="export-scope" id="exportScope"></div>
             <div class="export-section-label">기간</div>
@@ -747,9 +775,14 @@
     <div class="header-container">
         <div class="title-area">
             <h1>📋 품질팀 스케줄 관리<span id="ocrStatus"></span></h1>
-            <div class="view-mode-group">
-                <button class="view-mode-btn active" id="btnViewDaily" onclick="setViewMode('daily')">📅 일간 보기 (3일)</button>
-                <button class="view-mode-btn" id="btnViewWeekly" onclick="setViewMode('weekly')">🗓️ 주간 보기</button>
+            <div class="title-controls">
+                <!-- [추가] 공장 탭 (성남 / 동탄) -->
+                <div class="factory-tabs" id="factoryTabs"></div>
+                <span class="divider"></span>
+                <div class="view-mode-group">
+                    <button class="view-mode-btn active" id="btnViewDaily" onclick="setViewMode('daily')">📅 일간</button>
+                    <button class="view-mode-btn" id="btnViewWeekly" onclick="setViewMode('weekly')">🗓️ 주간</button>
+                </div>
             </div>
         </div>
 
@@ -781,7 +814,7 @@
             <div class="issue-strip-icon">🚨</div>
             <div class="issue-strip-text">
                 <span class="issue-strip-title">이슈사항</span>
-                <span class="issue-strip-sub">QA · 양산 · 개발 담당자별 이슈 기록 · 🔒 비밀번호 필요</span>
+                <span class="issue-strip-sub"><span id="issueStripFactory">성남</span> 공장 · QA · 양산 · 개발 담당자별 이슈 기록 · 🔒 비밀번호 필요</span>
             </div>
         </div>
         <span class="issue-strip-go">들어가기 ▶</span>
@@ -845,7 +878,28 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const scheduleRef = database.ref("weekly_schedule");
+        /* ---------- [추가] 공장 설정 ----------
+           성남: 기존 데이터 그대로 사용 (weekly_schedule / issue_board)
+           동탄: 새 저장 공간 (weekly_schedule_dongtan / issue_board_dongtan)
+           공장을 더 추가하려면 아래 목록에 한 줄 추가 */
+        const FACTORIES = [
+            { key: "seongnam", name: "성남", schedulePath: "weekly_schedule",         issuePath: "issue_board" },
+            { key: "dongtan",  name: "동탄", schedulePath: "weekly_schedule_dongtan", issuePath: "issue_board_dongtan" }
+        ];
+        function loadSavedFactory() {
+            const fromHash = (location.hash || "").replace("#", "");
+            if (FACTORIES.some(f => f.key === fromHash)) return fromHash;
+            try {
+                const saved = localStorage.getItem("qc_factory");
+                if (FACTORIES.some(f => f.key === saved)) return saved;
+            } catch (e) {}
+            return FACTORIES[0].key;
+        }
+        let currentFactory = loadSavedFactory();
+        function factoryInfo() { return FACTORIES.find(f => f.key === currentFactory) || FACTORIES[0]; }
+
+        let scheduleRef = null;
+        let scheduleHandler = null;
 
         const EDIT_PASSWORD = "3697";
 let editMode = false;
@@ -976,12 +1030,55 @@ const teamMembers = [
             "연차 및 외근": {}, "DR 및 미팅": {}, "기타업무": {}
         };
 
-        scheduleRef.on("value", (snapshot) => {
-            const data = snapshot.val();
-            if (data) { boardData = data; renderBoard(); }
-        });
+        function emptyBoard() {
+            return {
+                "Frame 입고": {}, "QC 검수": {}, "ACM 검수": {}, "Packing Date": {}, "Factory Out Date": {},
+                "연차 및 외근": {}, "DR 및 미팅": {}, "기타업무": {}
+            };
+        }
 
-        function autoSave() { scheduleRef.set(boardData); }
+        // 현재 공장의 스케줄 데이터 연결 (공장을 바꾸면 이전 연결은 끊고 새로 연결)
+        function connectSchedule() {
+            if (scheduleRef && scheduleHandler) scheduleRef.off("value", scheduleHandler);
+            const fk = currentFactory;
+            boardData = emptyBoard();
+            scheduleRef = database.ref(factoryInfo().schedulePath);
+            scheduleHandler = (snapshot) => {
+                if (fk !== currentFactory) return;      // 다른 공장 데이터가 늦게 도착하면 무시
+                const data = snapshot.val();
+                boardData = Object.assign(emptyBoard(), data || {});
+                renderBoard();
+            };
+            scheduleRef.on("value", scheduleHandler);
+        }
+
+        function autoSave() {
+            if (scheduleRef) scheduleRef.set(boardData);
+        }
+
+        // 공장 탭 화면 갱신
+        function renderFactoryTabs() {
+            const info = factoryInfo();
+            document.getElementById("factoryTabs").innerHTML = FACTORIES.map(f =>
+                `<button class="factory-tab ${f.key === currentFactory ? "active" : ""}" onclick="switchFactory('${f.key}')" title="${f.name} 공장">🏭 ${f.name}</button>`).join("");
+            document.getElementById("issueStripFactory").innerText = info.name;
+            document.title = `품질팀 주간 스케줄 관리 시스템 - ${info.name}`;
+        }
+
+        function switchFactory(key) {
+            if (key === currentFactory) return;
+            if (document.activeElement) document.activeElement.blur();   // 작성 중이던 내용 먼저 저장
+            currentFactory = key;
+            try { localStorage.setItem("qc_factory", key); } catch (e) {}
+            try { history.replaceState(null, "", "#" + key); } catch (e) {}
+            const sf = document.getElementById("searchInput"); if (sf) sf.value = "";
+            renderFactoryTabs();
+            connectSchedule();
+            renderBoard();
+            if (typeof onFactoryChangedForIssues === "function") onFactoryChangedForIssues();
+        }
+
+        connectSchedule();
         async function manualSave() {
     if (!(await requestEditPermission())) return;
     autoSave();
@@ -1468,6 +1565,8 @@ const teamMembers = [
         let issueData = { team: {} };
         let issueUnlocked = false;
         let issueRef = null;
+        let issueHandler = null;
+        function issueRoot() { return factoryInfo().issuePath; }
         // level: teams | all(전체 보기) | members | member
         let issueView = { level: "teams" };
         let issueAllTeam = "";          // 전체 보기 팀 필터 ("" = 전체)
@@ -1496,7 +1595,7 @@ const teamMembers = [
         }
         function saveTarget(target) {
             if (ISSUE_DEMO_MODE) { renderIssueBoard(); return; }
-            database.ref("issue_board/team/" + target.id).set(issueData.team[target.id] || null).catch(err => {
+            database.ref(issueRoot() + "/team/" + target.id).set(issueData.team[target.id] || null).catch(err => {
                 console.error("이슈 저장 실패", err);
                 alert("❌ 이슈사항 저장에 실패했습니다.\n인터넷 연결 또는 Firebase 데이터베이스 권한(규칙)을 확인하세요.");
             });
@@ -1526,15 +1625,27 @@ const teamMembers = [
             }
             document.getElementById("issueDemoTag").style.display = "none";
             if (issueRef) return;
-            issueRef = database.ref("issue_board");
-            issueRef.on("value", (snapshot) => {
+            const fk = currentFactory;
+            issueRef = database.ref(issueRoot());
+            issueHandler = (snapshot) => {
+                if (fk !== currentFactory) return;      // 다른 공장 데이터가 늦게 도착하면 무시
                 const v = snapshot.val() || {};
                 issueData = { team: v.team || {} };
                 if (document.getElementById("issueOverlay").classList.contains("show")) renderIssueBoard(true);
-            }, (err) => {
+            };
+            issueRef.on("value", issueHandler, (err) => {
                 console.error("이슈 불러오기 실패", err);
                 alert("❌ 이슈사항을 불러오지 못했습니다.\nFirebase 데이터베이스 권한(규칙)을 확인하세요.");
             });
+        }
+
+        // 공장을 바꾸면 이슈사항도 그 공장 데이터로 다시 연결
+        function onFactoryChangedForIssues() {
+            if (issueRef && issueHandler) issueRef.off("value", issueHandler);
+            issueRef = null; issueHandler = null;
+            issueData = { team: {} };
+            closeIssueBoard();
+            if (issueUnlocked) connectIssueDatabase();
         }
 
         /* ---------- 열기 / 닫기 / 이동 ---------- */
@@ -1576,7 +1687,7 @@ const teamMembers = [
         function renderIssueBreadcrumb() {
             const v = issueView;
             const sep = `<span class="sep">›</span>`;
-            let html = `<span class="crumb" onclick="issueGoTo('teams')">🚨 이슈사항</span>`;
+            let html = `<span class="crumb" onclick="issueGoTo('teams')">🚨 ${factoryInfo().name} 이슈사항</span>`;
             if (v.level === "all") html += sep + `<span>전체 보기</span>`;
             if (v.a) html += sep + `<span class="crumb" onclick="issueGoTo('members','${v.a}')">${v.a}</span>`;
             if (v.b) html += sep + `<span>${v.b}</span>`;
@@ -1934,6 +2045,7 @@ const teamMembers = [
 
         function openExportModal() {
             exportScope = currentExportScope();
+            document.getElementById("exportFactory").innerText = factoryInfo().name;
             document.getElementById("exportScope").innerHTML = `${exportScope.label}<span class="desc">${exportScope.desc}</span>`;
             document.getElementById("exportFrom").value = mondayOf(todayStr);
             document.getElementById("exportTo").value = todayStr;
@@ -2062,11 +2174,11 @@ const teamMembers = [
 
             const { teamRows } = collectExportRows(from, to);
             const periodText = from || to ? `${periodName} (${from} ~ ${to})` : "전체 기간";
-            const info = `기간: ${periodText}   ·   범위: ${exportScope.label.replace(/^[^ ]+ /, "")}   ·   내보낸 날짜: ${todayStr}`;
+            const info = `공장: ${factoryInfo().name}   ·   기간: ${periodText}   ·   범위: ${exportScope.label.replace(/^[^ ]+ /, "")}   ·   내보낸 날짜: ${todayStr}`;
 
             const wb = new ExcelJS.Workbook();
             wb.creator = "품질팀 스케줄 관리";
-            styleSheet(wb.addWorksheet("팀별 이슈"), "품질팀 이슈사항 – 팀별 이슈", info,
+            styleSheet(wb.addWorksheet("팀별 이슈"), `품질팀 이슈사항 – ${factoryInfo().name} 공장`, info,
                 ["날짜", "요일", "팀", "담당자", "내용"], [12, 6, 8, 10, 80], teamRows, { wrapCols: [4] });
 
             const buf = await wb.xlsx.writeBuffer();
@@ -2074,7 +2186,7 @@ const teamMembers = [
             const scopeName = exportScope.kind === "all" ? "전체" : exportScope.label.replace(/^[^ ]+ /, "").replace(/[()\s]+/g, "_").replace(/_$/, "");
             const a = document.createElement("a");
             a.href = URL.createObjectURL(blob);
-            a.download = `품질팀_이슈사항_${scopeName}_${todayStr}.xlsx`;
+            a.download = `품질팀_이슈사항_${factoryInfo().name}_${scopeName}_${todayStr}.xlsx`;
             document.body.appendChild(a); a.click(); a.remove();
             setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 
@@ -2085,6 +2197,7 @@ const teamMembers = [
         }
 
         window.onload = () => {
+            renderFactoryTabs();
             initTodayBadge();
             updateWeekDates(currentDate);
         };
